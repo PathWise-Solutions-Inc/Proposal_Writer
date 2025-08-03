@@ -1,18 +1,44 @@
-# macOS
-.DS_Store
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# Node
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Production
+build/
+dist/
+*.local
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
 
 # Python
 __pycache__/
@@ -23,17 +49,62 @@ __pycache__/
 venv/
 ENV/
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Logs
-logs/
-*.log
+# Cache
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+.cache/
+.parcel-cache/
 
 # Temporary files
-*.tmp
-*.temp
 tmp/
 temp/
+*.tmp
+*.temp
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Docker
+.docker/
+
+# Uploads
+uploads/
+public/uploads/
+
+# Build artifacts
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Optional npm cache directory
+.npm
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Turborepo
+.turbo
+
+# vercel
+.vercel
+
+# Lerna
+lerna-debug.log

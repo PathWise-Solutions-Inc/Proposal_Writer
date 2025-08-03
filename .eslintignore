@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+*.config.js
+*.config.ts
+public/
+.next/
+.nuxt/
+*.min.js
+*.bundle.js

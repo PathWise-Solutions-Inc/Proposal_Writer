@@ -1,0 +1,54 @@
+version: '3.8'
+
+# Development overrides for docker-compose.yml
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  mongodb:
+    ports:
+      - "27017:27017"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  elasticsearch:
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile.dev
+    command: npm run dev
+    volumes:
+      - ./services/auth-service/src:/app/src
+      - ./packages/shared:/app/node_modules/@proposal-writer/shared
+    environment:
+      NODE_ENV: development
+
+  rfp-analysis-service:
+    build:
+      context: ./services/rfp-analysis-service
+      dockerfile: Dockerfile.dev
+    command: npm run dev
+    volumes:
+      - ./services/rfp-analysis-service/src:/app/src
+      - ./packages/shared:/app/node_modules/@proposal-writer/shared
+    environment:
+      NODE_ENV: development
+
+  web-app:
+    stdin_open: true
+    tty: true
+    environment:
+      NODE_ENV: development
+      VITE_HMR_HOST: localhost
+      VITE_HMR_PORT: 3000
