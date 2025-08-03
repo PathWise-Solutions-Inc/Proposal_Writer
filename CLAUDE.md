@@ -45,10 +45,20 @@ The repository contains product documentation and research:
 - ✅ OpenRouter API integration configured and tested
 - ✅ AI service structure created with OpenRouter client
 
+**Completed:**
+- ✅ Phase 1: Authentication & Infrastructure (Week 1) - August 3, 2025
+  - JWT-based authentication with access/refresh tokens
+  - User registration and login with secure password validation
+  - Protected routes with React Router
+  - CSRF protection and rate limiting
+  - Frontend authentication UI (login/register pages)
+  - Redux authentication state management
+  - Successful end-to-end authentication flow tested
+
 **In Progress:**
-- 🔄 Phase 1: Authentication & Infrastructure (Week 1-2)
-  - Current: Implementing user authentication system (models, controllers, JWT)
-  - Next: Frontend auth pages and protected routes
+- 🔄 Phase 2: RFP Analysis Engine (Week 3-6)
+  - Current: Starting file upload infrastructure
+  - Next: Document text extraction with Apache Tika
 
 **Upcoming Phases:**
 - Phase 2: RFP Analysis Engine (Week 3-6) - Core MVP feature
@@ -126,3 +136,27 @@ Claude Code provides specialized agents that can assist with different aspects o
 - **debugger** - Troubleshoot issues in RFP processing or AI content generation
 
 Use these agents by invoking them with the Task tool when you need specialized assistance in their respective domains.
+
+## Testing Tools
+
+### Playwright MCP
+The Playwright MCP (Model Context Protocol) server is available for automated browser testing and UI/UX validation. Use this tool whenever:
+- New UI components or pages are added
+- UI/UX changes need to be tested
+- End-to-end user workflows need validation
+- Visual regression testing is required
+- Cross-browser compatibility needs verification
+
+Key capabilities:
+- Browser automation for testing user interactions
+- Screenshot capture for visual verification
+- Form filling and button clicking automation
+- Navigation and page state validation
+- Console message and network request monitoring
+
+Example use cases for Proposal Writer:
+- Testing the drag-and-drop proposal builder interface
+- Validating RFP upload and parsing workflows
+- Verifying authentication flows and protected routes
+- Testing responsive design across different viewports
+- Ensuring compliance tracker UI updates correctly
