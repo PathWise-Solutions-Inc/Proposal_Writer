@@ -20,6 +20,14 @@ This document tracks the development progress of the Proposal Writer MVP, target
   - Frontend authentication pages
   - Redux auth state management
 
+- 🔄 **RFP Analysis Engine In Progress** (Week 3 - Started August 3, 2025)
+  - ✅ Database models (Organization, RFP, Proposal)
+  - ✅ File upload infrastructure with validation
+  - ✅ Local file storage with deduplication
+  - ✅ Basic text extraction for PDFs
+  - 🔄 OpenRouter API integration (next task)
+  - 🔄 Evaluation rubric generator (pending)
+
 ## MVP Features Checklist
 
 ### Phase 1: Authentication & Infrastructure (Week 1-2) ✅ **COMPLETE**
@@ -40,14 +48,14 @@ This document tracks the development progress of the Proposal Writer MVP, target
   - [ ] API documentation (Swagger) (Phase 6)
 
 ### Phase 2: RFP Analysis Engine (Week 3-6) 🎯 **Core Value Prop**
-- [ ] File Upload & Processing
-  - [ ] Multi-file upload endpoint
-  - [ ] File type validation (PDF, Word, Text)
-  - [ ] Virus scanning integration
-  - [ ] File storage in S3
+- [x] File Upload & Processing
+  - [x] Multi-file upload endpoint
+  - [x] File type validation (PDF, Word, Text)
+  - [ ] Virus scanning integration (deferred)
+  - [x] File storage (local for MVP, S3 for production)
 - [ ] Document Text Extraction
   - [ ] Apache Tika integration
-  - [ ] PDF parsing with fallbacks
+  - [x] PDF parsing with pdf-parse
   - [ ] Word document processing
   - [ ] Text cleaning and normalization
 - [ ] Claude API Integration
@@ -226,4 +234,4 @@ This document tracks the development progress of the Proposal Writer MVP, target
 ---
 
 Last Updated: August 3, 2025
-Status: Phase 1 Complete - Starting Phase 2 (RFP Analysis Engine)
+Status: Phase 2 In Progress - RFP Analysis Engine (Upload Infrastructure Complete)
