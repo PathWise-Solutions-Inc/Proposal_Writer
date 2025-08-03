@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, ManyToOne, JoinColumn } from 'typeorm';
 import bcrypt from 'bcryptjs';
+import { Organization } from './Organization';
 
 @Entity('users')
 export class User {
@@ -27,6 +28,13 @@ export class User {
 
   @Column({ nullable: true })
   refreshToken?: string;
+
+  @Column({ nullable: true })
+  organizationId?: string;
+
+  @ManyToOne(() => Organization, organization => organization.users)
+  @JoinColumn({ name: 'organizationId' })
+  organization?: Organization;
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -1,5 +1,8 @@
 import { DataSource } from 'typeorm';
 import { User } from '../models/User';
+import { Organization } from '../models/Organization';
+import { RFP } from '../models/RFP';
+import { Proposal } from '../models/Proposal';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'proposal_writer',
   synchronize: process.env.NODE_ENV === 'development',
   logging: process.env.NODE_ENV === 'development',
-  entities: [User],
+  entities: [User, Organization, RFP, Proposal],
   migrations: ['src/migrations/*.ts'],
   subscribers: ['src/subscribers/*.ts'],
 });
