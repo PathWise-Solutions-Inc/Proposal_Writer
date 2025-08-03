@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import { validationResult } from 'express-validator';
+import { AuthenticatedRequest } from '../types/auth.types';
 
 export class AuthController {
   private authService = new AuthService();
@@ -91,7 +92,7 @@ export class AuthController {
 
   async logout(req: Request, res: Response): Promise<Response> {
     try {
-      const userId = (req as any).user?.userId;
+      const userId = (req as AuthenticatedRequest).user?.userId;
       
       if (userId) {
         await this.authService.logout(userId);
@@ -106,7 +107,7 @@ export class AuthController {
 
   async getProfile(req: Request, res: Response): Promise<Response> {
     try {
-      const userId = (req as any).user?.userId;
+      const userId = (req as AuthenticatedRequest).user?.userId;
       const user = await this.authService.getUserById(userId);
       
       if (!user) {

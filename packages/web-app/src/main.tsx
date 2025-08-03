@@ -8,6 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import App from './App';
 import { store } from './store';
 import { theme } from './styles/theme';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './styles/global.css';
 
 const queryClient = new QueryClient({
@@ -22,14 +23,16 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <App />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <App />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </Provider>
+    </ErrorBoundary>
   </React.StrictMode>,
 );

@@ -2,6 +2,7 @@ import { AppDataSource } from '../config/database';
 import { User } from '../models/User';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import bcrypt from 'bcryptjs';
+// import { SecurityLogger } from '../utils/security-logger'; // TODO: Implement security logging
 
 export interface RegisterDto {
   email: string;
