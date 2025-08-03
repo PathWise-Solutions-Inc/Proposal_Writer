@@ -1,7 +1,7 @@
 -- Create databases for different services
-CREATE DATABASE IF NOT EXISTS proposal_writer;
-CREATE DATABASE IF NOT EXISTS proposal_writer_auth;
-CREATE DATABASE IF NOT EXISTS proposal_writer_proposals;
+CREATE DATABASE proposal_writer;
+CREATE DATABASE proposal_writer_auth;
+CREATE DATABASE proposal_writer_proposals;
 
 -- Create extensions
 \c proposal_writer;

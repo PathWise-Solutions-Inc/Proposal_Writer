@@ -42,10 +42,13 @@ The repository contains product documentation and research:
 - ✅ Docker configuration
 - ✅ CI/CD pipeline
 - ✅ Development environment setup
+- ✅ OpenRouter API integration configured and tested
+- ✅ AI service structure created with OpenRouter client
 
 **In Progress:**
 - 🔄 Phase 1: Authentication & Infrastructure (Week 1-2)
-  - Next: User authentication system implementation
+  - Current: Implementing user authentication system (models, controllers, JWT)
+  - Next: Frontend auth pages and protected routes
 
 **Upcoming Phases:**
 - Phase 2: RFP Analysis Engine (Week 3-6) - Core MVP feature
@@ -67,8 +70,11 @@ When implementing:
 ## Key Technical Decisions (from research)
 
 ### AI/NLP Integration
-- Primary: Claude 3.5 Sonnet API for content generation
-- Alternative: GPT-4 for specific use cases
+- **Now Using: OpenRouter API** - Unified access to multiple AI models
+  - Primary model: Claude 3.5 Sonnet via OpenRouter
+  - Alternative models available: GPT-4, Gemini, Llama, etc.
+  - Cost-effective pay-as-you-go pricing
+  - API Key configured in `.env` as `OPENROUTER_API_KEY`
 - Consider DeepRFP or AutoRFP.ai for specialized RFP processing
 
 ### Frontend Framework
@@ -98,13 +104,7 @@ The repository is hosted at: https://github.com/PathWise-Solutions-Inc/Proposal_
 
 Claude Code provides specialized agents that can assist with different aspects of the Proposal Writer project:
 
-### Research & Analysis Agents
-- **market-research-analyst** - Conduct market research for RFP automation space, competitor analysis, and market opportunities
-- **technical-solutions-researcher** - Research technical approaches for RFP parsing, AI integration, and document processing
-- **value-proposition-strategist** - Develop unique value propositions and competitive advantages for the platform
-
 ### Product Development Agents
-- **prd-architect** - Create and refine product requirements documents based on research findings
 - **ui-ux-designer** - Design user interfaces for the proposal builder, RFP analyzer, and dashboard
 - **api-documenter** - Document APIs for RFP processing, client intelligence, and proposal generation services
 
