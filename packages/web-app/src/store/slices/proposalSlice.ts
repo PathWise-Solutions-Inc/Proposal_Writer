@@ -114,6 +114,24 @@ const proposalSlice = createSlice({
   initialState,
   reducers: {
     // Proposal management
+    createProposal: (state, action: PayloadAction<Proposal>) => {
+      state.proposals.push(action.payload);
+      state.currentProposal = action.payload;
+      state.sectionTree.sections = action.payload.sections;
+      state.sectionTree.selectedSectionId = undefined;
+      state.sectionTree.expandedSections = new Set();
+    },
+
+    deleteProposal: (state, action: PayloadAction<string>) => {
+      state.proposals = state.proposals.filter(p => p.id !== action.payload);
+      if (state.currentProposal?.id === action.payload) {
+        state.currentProposal = null;
+        state.sectionTree.sections = [];
+        state.sectionTree.selectedSectionId = undefined;
+        state.sectionTree.expandedSections = new Set();
+      }
+    },
+
     setCurrentProposal: (state, action: PayloadAction<Proposal>) => {
       state.currentProposal = action.payload;
       state.sectionTree.sections = action.payload.sections;
@@ -381,6 +399,8 @@ const proposalSlice = createSlice({
 });
 
 export const {
+  createProposal,
+  deleteProposal,
   setCurrentProposal,
   updateProposalTitle,
   addSection,

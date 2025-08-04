@@ -13,7 +13,8 @@ import {
   Divider,
   Chip,
   Stack,
-  Alert
+  Alert,
+  TextField
 } from '@mui/material';
 import {
   Home,
@@ -35,7 +36,7 @@ import { ProposalSection, SectionType } from '../types/section.types';
 import SectionTree from '../components/proposal/SectionTree';
 import CollaboratorPresence from '../components/collaboration/CollaboratorPresence';
 import VersionHistory from '../components/proposal/VersionHistory';
-import { RichTextEditor } from '../components/proposal/rich-text-editor';
+// import { RichTextEditor } from '../components/proposal/rich-text-editor';
 import AIContentGenerator from '../components/proposal/AIContentGenerator';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAutoSave } from '../hooks/useAutoSave';
@@ -46,7 +47,7 @@ export default function ProposalBuilder() {
   const { id: proposalId } = useParams<{ id: string }>();
   const { isConnected } = useWebSocket();
   
-  const { currentProposal, sectionTree, loading, error } = useSelector(
+  const { currentProposal, sectionTree, loading, error, proposals } = useSelector(
     (state: RootState) => state.proposal
   );
   
@@ -56,108 +57,22 @@ export default function ProposalBuilder() {
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [editorContent, setEditorContent] = useState<string>('');
 
-  // Mock proposal data - in real app, this would come from API
+  // Load proposal from store or redirect if not found
   useEffect(() => {
     if (proposalId && !currentProposal) {
-      // Mock loading a proposal
-      const mockProposal = {
-        id: proposalId,
-        title: 'IT Services Proposal - Acme Corp',
-        description: 'Comprehensive IT services proposal for Acme Corporation',
-        sections: [
-          {
-            id: 'section_1',
-            type: SectionType.HEADING,
-            title: 'Executive Summary',
-            content: { text: 'Executive Summary', level: 1 },
-            order: 0,
-            isCollapsed: false,
-            isRequired: true,
-            metadata: {
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              tags: ['executive', 'summary']
-            }
-          },
-          {
-            id: 'section_2',
-            type: SectionType.PARAGRAPH,
-            title: 'Company Overview',
-            content: { text: 'Our company has been providing exceptional IT services...' },
-            order: 1,
-            isCollapsed: false,
-            isRequired: false,
-            metadata: {
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              tags: ['company', 'overview']
-            }
-          },
-          {
-            id: 'section_3',
-            type: SectionType.GROUP,
-            title: 'Technical Solution',
-            content: { text: 'Technical Solution' },
-            order: 2,
-            isCollapsed: false,
-            isRequired: true,
-            children: [
-              {
-                id: 'section_3_1',
-                type: SectionType.HEADING,
-                title: 'Architecture Overview',
-                content: { text: 'Architecture Overview', level: 2 },
-                parentId: 'section_3',
-                order: 0,
-                isCollapsed: false,
-                isRequired: true,
-                metadata: {
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                  tags: ['architecture', 'technical']
-                }
-              },
-              {
-                id: 'section_3_2',
-                type: SectionType.LIST,
-                title: 'Key Features',
-                content: {
-                  listType: 'unordered' as any,
-                  listItems: [
-                    'Scalable cloud infrastructure',
-                    '24/7 monitoring and support',
-                    'Advanced security protocols',
-                    'Automated backup systems'
-                  ]
-                },
-                parentId: 'section_3',
-                order: 1,
-                isCollapsed: false,
-                isRequired: false,
-                metadata: {
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                  tags: ['features', 'technical']
-                }
-              }
-            ],
-            metadata: {
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              tags: ['technical', 'solution']
-            }
-          }
-        ],
-        rfpId: 'rfp_123',
-        status: 'draft' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'user_123'
-      };
+      // Check if proposal exists in the store
+      const proposal = proposals.find(p => p.id === proposalId);
       
-      dispatch(setCurrentProposal(mockProposal));
+      if (!proposal) {
+        // Proposal not found, redirect to proposals list
+        navigate('/proposals');
+        return;
+      }
+      
+      // Set current proposal if found
+      dispatch(setCurrentProposal(proposal));
     }
-  }, [proposalId, currentProposal, dispatch]);
+  }, [proposalId, currentProposal, proposals, dispatch, navigate]);
 
   // Auto-save functionality
   const { triggerSave } = useAutoSave({
@@ -197,7 +112,11 @@ export default function ProposalBuilder() {
   const handleSectionSelect = (section: ProposalSection) => {
     setSelectedSection(section);
     // Load section content into editor
-    setEditorContent(section.content.text || '');
+    // Handle case where content might be a string or object
+    const contentText = typeof section.content === 'string' 
+      ? section.content 
+      : section.content?.text || '';
+    setEditorContent(contentText);
   };
 
   const handleContentChange = (content: string) => {
@@ -209,7 +128,9 @@ export default function ProposalBuilder() {
       dispatch(updateSection({
         sectionId: selectedSection.id,
         updates: {
-          content: { ...selectedSection.content, text: content }
+          content: typeof selectedSection.content === 'string'
+            ? { text: content }
+            : { ...selectedSection.content, text: content }
         }
       }));
     }
@@ -439,16 +360,25 @@ export default function ProposalBuilder() {
                     </Button>
                   </Box>
 
-                  {/* Rich Text Editor */}
-                  <Box sx={{ flex: 1, overflow: 'hidden' }}>
-                    <RichTextEditor
-                      content={editorContent}
-                      sectionType={selectedSection.type}
-                      sectionId={selectedSection.id}
-                      onChange={handleContentChange}
-                      onSave={handleSaveProposal}
-                      autoSave={true}
-                      showAIPanel={false}
+                  {/* Content Editor */}
+                  <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      variant="outlined"
+                      value={editorContent}
+                      onChange={(e) => handleContentChange(e.target.value)}
+                      placeholder="Enter your content here..."
+                      sx={{
+                        '& .MuiInputBase-root': {
+                          height: '100%',
+                          alignItems: 'flex-start',
+                        },
+                        '& .MuiInputBase-input': {
+                          height: '100% !important',
+                          overflow: 'auto !important',
+                        },
+                      }}
                     />
                   </Box>
                 </>

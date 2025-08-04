@@ -16,6 +16,7 @@ const RfpUpload = lazy(() => import('./pages/RfpUpload'));
 const RfpDetails = lazy(() => import('./pages/RfpDetails'));
 const ContentLibrary = lazy(() => import('./pages/ContentLibrary'));
 const Settings = lazy(() => import('./pages/Settings'));
+const TestProposalBuilder = lazy(() => import('./pages/TestProposalBuilder'));
 
 const LoadingFallback = () => (
   <Box
@@ -49,12 +50,13 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/proposals" element={<ProposalList />} />
-              <Route path="/proposals/:id" element={<ProposalBuilder />} />
+              <Route path="/proposals/:id/builder" element={<ProposalBuilder />} />
               <Route path="/rfp-analysis" element={<RfpAnalysis />} />
               <Route path="/rfps/upload" element={<RfpUpload />} />
               <Route path="/rfps/:id" element={<RfpDetails />} />
               <Route path="/content-library" element={<ContentLibrary />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/test-proposal" element={<TestProposalBuilder />} />
             </Route>
           </Route>
 

@@ -25,7 +25,7 @@ import { useDispatch } from 'react-redux';
 
 import { ProposalSection, SectionType, ListType } from '../../types/section.types';
 import { updateSection } from '../../store/slices/proposalSlice';
-import { RichTextEditor } from './rich-text-editor';
+// import { RichTextEditor } from './rich-text-editor';
 import AIContentGenerator from './AIContentGenerator';
 
 interface SectionEditorProps {
@@ -44,11 +44,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   onSave
 }) => {
   const dispatch = useDispatch();
-  const [editorMode, setEditorMode] = useState<EditorMode>(
-    section.type === SectionType.PARAGRAPH || 
-    section.type === SectionType.HEADING ||
-    section.type === SectionType.CUSTOM ? 'rich' : 'basic'
-  );
+  const [editorMode, setEditorMode] = useState<EditorMode>('basic');
   const [formData, setFormData] = useState({
     title: section.title,
     type: section.type,
@@ -228,15 +224,11 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth={editorMode === 'rich' && supportsRichText ? 'xl' : 'md'}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: { 
           borderRadius: 2,
-          ...(editorMode === 'rich' && supportsRichText && {
-            height: '90vh',
-            maxHeight: '90vh'
-          })
         }
       }}
     >
@@ -251,21 +243,8 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ 
-        ...(editorMode === 'rich' && supportsRichText && {
-          height: 'calc(90vh - 120px)',
-          display: 'flex',
-          flexDirection: 'column'
-        })
-      }}>
-        <Box sx={{ 
-          pt: 1,
-          ...(editorMode === 'rich' && supportsRichText && {
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column'
-          })
-        }}>
+      <DialogContent>
+        <Box sx={{ pt: 1 }}>
           <TextField
             fullWidth
             label="Section Title"
@@ -274,8 +253,8 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             sx={{ mb: 3 }}
           />
 
-          {/* Editor Mode Tabs */}
-          {supportsRichText && (
+          {/* Editor Mode Tabs - Temporarily hidden */}
+          {/* {supportsRichText && (
             <Box sx={{ mb: 2 }}>
               <Tabs
                 value={editorMode}
@@ -298,14 +277,14 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                 />
               </Tabs>
             </Box>
-          )}
+          )} */}
 
           <Typography variant="subtitle2" sx={{ mb: 2 }}>
             Content
           </Typography>
           
-          {/* Rich Text Editor */}
-          {editorMode === 'rich' && supportsRichText ? (
+          {/* Rich Text Editor - Temporarily disabled */}
+          {/* {editorMode === 'rich' && supportsRichText ? (
             <Box sx={{ 
               flex: 1, 
               minHeight: 400,
@@ -325,7 +304,8 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             </Box>
           ) : (
             renderContentEditor()
-          )}
+          )} */}
+          {renderContentEditor()}
 
           <Box sx={{ mt: 3 }}>
             <FormControlLabel

@@ -11,7 +11,7 @@ import {
   ListItemText,
   Tooltip,
   alpha,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import {
   DragIndicator,
@@ -25,26 +25,24 @@ import {
   Visibility,
   VisibilityOff,
   Folder,
-  FolderOpen,
   Title,
   TextFields,
   FormatListBulleted,
-  FormatListNumbered,
   TableChart,
   Image,
-  Code
+  Code,
 } from '@mui/icons-material';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
 import { ProposalSection, SectionType } from '../../types/section.types';
-import { 
-  deleteSection, 
-  duplicateSection, 
-  selectSection, 
+import {
+  deleteSection,
+  duplicateSection,
+  selectSection,
   toggleSectionExpansion,
   updateSection,
-  addSection
+  addSection,
 } from '../../store/slices/proposalSlice';
 
 interface SectionNodeProps {
@@ -100,393 +98,413 @@ const getSectionTypeColor = (type: SectionType) => {
   }
 };
 
-const SectionNode: React.FC<SectionNodeProps> = memo(({
-  section,
-  index,
-  isSelected,
-  isExpanded,
-  isDragDisabled = false,
-  level,
-  onEdit,
-  onSelect
-}) => {
-  const theme = useTheme();
-  const dispatch = useDispatch();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+const SectionNode: React.FC<SectionNodeProps> = memo(
+  ({ section, index, isSelected, isExpanded, isDragDisabled = false, level, onEdit, onSelect }) => {
+    const theme = useTheme();
+    const dispatch = useDispatch();
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [isHovered, setIsHovered] = useState(false);
 
-  const hasChildren = section.children && section.children.length > 0;
-  const canHaveChildren = section.type === SectionType.GROUP;
-  const sectionColor = getSectionTypeColor(section.type);
+    const hasChildren = section.children && section.children.length > 0;
+    const canHaveChildren = section.type === SectionType.GROUP;
+    const sectionColor = getSectionTypeColor(section.type);
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
+    const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+      event.stopPropagation();
+      setAnchorEl(event.currentTarget);
+    };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    const handleMenuClose = () => {
+      setAnchorEl(null);
+    };
 
-  const handleSelect = () => {
-    dispatch(selectSection(section.id));
-    if (onSelect) {
-      onSelect(section);
-    }
-  };
+    const handleSelect = () => {
+      dispatch(selectSection(section.id));
+      if (onSelect) {
+        onSelect(section);
+      }
+    };
 
-  const handleToggleExpansion = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (canHaveChildren) {
-      dispatch(toggleSectionExpansion(section.id));
-    }
-  };
+    const handleToggleExpansion = (event: React.MouseEvent) => {
+      event.stopPropagation();
+      if (canHaveChildren) {
+        dispatch(toggleSectionExpansion(section.id));
+      }
+    };
 
-  const handleDelete = () => {
-    dispatch(deleteSection(section.id));
-    handleMenuClose();
-  };
+    const handleDelete = () => {
+      dispatch(deleteSection(section.id));
+      handleMenuClose();
+    };
 
-  const handleDuplicate = () => {
-    dispatch(duplicateSection(section.id));
-    handleMenuClose();
-  };
+    const handleDuplicate = () => {
+      dispatch(duplicateSection(section.id));
+      handleMenuClose();
+    };
 
-  const handleEdit = () => {
-    if (onEdit) {
-      onEdit(section);
-    }
-    handleMenuClose();
-  };
+    const handleEdit = () => {
+      if (onEdit) {
+        onEdit(section);
+      }
+      handleMenuClose();
+    };
 
-  const handleAddChild = () => {
-    if (canHaveChildren) {
-      dispatch(addSection({ parentId: section.id }));
-    }
-    handleMenuClose();
-  };
+    const handleAddChild = () => {
+      if (canHaveChildren) {
+        dispatch(addSection({ parentId: section.id }));
+      }
+      handleMenuClose();
+    };
 
-  const handleToggleRequired = () => {
-    dispatch(updateSection({
-      sectionId: section.id,
-      updates: { isRequired: !section.isRequired }
-    }));
-    handleMenuClose();
-  };
+    const handleToggleRequired = () => {
+      dispatch(
+        updateSection({
+          sectionId: section.id,
+          updates: { isRequired: !section.isRequired },
+        }),
+      );
+      handleMenuClose();
+    };
 
-  const renderSectionContent = () => {
-    switch (section.type) {
-      case SectionType.HEADING:
-        return (
-          <Typography 
-            variant={section.content.level === 1 ? 'h6' : 'subtitle1'}
-            sx={{ fontWeight: 600, color: 'text.primary' }}
-          >
-            {section.content.text || section.title}
-          </Typography>
-        );
-      case SectionType.PARAGRAPH:
-        return (
-          <Typography variant="body2" color="text.secondary">
-            {section.content.text || 'Empty paragraph'}
-          </Typography>
-        );
-      case SectionType.LIST:
-        return (
-          <Typography variant="body2" color="text.secondary">
-            {section.content.listItems?.length || 0} items
-          </Typography>
-        );
-      case SectionType.TABLE:
-        return (
-          <Typography variant="body2" color="text.secondary">
-            {section.content.tableData?.rows?.length || 0} rows, {section.content.tableData?.headers?.length || 0} columns
-          </Typography>
-        );
-      case SectionType.IMAGE:
-        return (
-          <Typography variant="body2" color="text.secondary">
-            {section.content.imageUrl ? 'Image attached' : 'No image'}
-          </Typography>
-        );
-      case SectionType.GROUP:
-        return (
-          <Typography variant="body2" color="text.secondary">
-            {hasChildren ? `${section.children?.length} sections` : 'Empty group'}
-          </Typography>
-        );
-      default:
-        return (
-          <Typography variant="body2" color="text.secondary">
-            {section.title}
-          </Typography>
-        );
-    }
-  };
+    const renderSectionContent = () => {
+      // Helper function to truncate text content for preview
+      const truncateText = (text: string, maxLength: number = 40): string => {
+        if (!text || text.length <= maxLength) return text || '';
+        return text.substring(0, maxLength).trim() + '...';
+      };
 
-  return (
-    <Draggable
-      draggableId={section.id}
-      index={index}
-      isDragDisabled={isDragDisabled}
-    >
-      {(provided, snapshot) => (
-        <Box
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          sx={{
-            mb: 0.5,
-            ml: level * 2,
-          }}
-        >
-          <Box
-            onClick={handleSelect}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleSelect();
-              }
-            }}
-            tabIndex={0}
-            role="treeitem"
-            aria-selected={isSelected}
-            aria-expanded={canHaveChildren ? isExpanded : undefined}
-            aria-level={level + 1}
-            aria-label={`${section.title} - ${section.type}${section.isRequired ? ' (Required)' : ''}`}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              px: 1,
-              py: 0.75,
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: isSelected 
-                ? sectionColor 
-                : snapshot.isDragging 
-                  ? alpha(sectionColor, 0.3)
-                  : 'transparent',
-              backgroundColor: isSelected
-                ? alpha(sectionColor, 0.08)
-                : snapshot.isDragging
-                  ? alpha(sectionColor, 0.05)
-                  : isHovered
-                    ? alpha(theme.palette.action.hover, 0.04)
-                    : 'transparent',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                backgroundColor: isSelected
-                  ? alpha(sectionColor, 0.12)
-                  : alpha(theme.palette.action.hover, 0.08),
-              }
-            }}
-          >
-            {/* Drag Handle */}
-            <Box
-              {...provided.dragHandleProps}
+      switch (section.type) {
+        case SectionType.HEADING:
+          // For headings, don't show additional content since title is the content
+          return null;
+        case SectionType.PARAGRAPH: {
+          const paragraphText =
+            typeof section.content === 'string' ? section.content : section.content?.text;
+          if (!paragraphText) {
+            return (
+              <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+                Empty paragraph
+              </Typography>
+            );
+          }
+          return (
+            <Typography
+              variant="caption"
+              color="text.secondary"
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                mr: 1,
-                opacity: isHovered || snapshot.isDragging ? 1 : 0.3,
-                transition: 'opacity 0.2s ease-in-out',
-                cursor: 'grab',
-                '&:active': {
-                  cursor: 'grabbing',
+                display: 'block',
+                lineHeight: 1.2,
+                opacity: 0.8,
+              }}
+            >
+              {truncateText(paragraphText, 45)}
+            </Typography>
+          );
+        }
+        case SectionType.LIST: {
+          const itemCount =
+            (typeof section.content === 'object' ? section.content.listItems?.length : 0) || 0;
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8 }}>
+              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+            </Typography>
+          );
+        }
+        case SectionType.TABLE: {
+          const rowCount = section.content.tableData?.rows?.length || 0;
+          const colCount = section.content.tableData?.headers?.length || 0;
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8 }}>
+              {rowCount} rows, {colCount} columns
+            </Typography>
+          );
+        }
+        case SectionType.IMAGE:
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8 }}>
+              {section.content.imageUrl ? 'Image attached' : 'No image'}
+            </Typography>
+          );
+        case SectionType.GROUP:
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8 }}>
+              {hasChildren
+                ? `${section.children?.length} ${section.children?.length === 1 ? 'section' : 'sections'}`
+                : 'Empty group'}
+            </Typography>
+          );
+        case SectionType.CUSTOM: {
+          const customText = section.content?.customHtml || section.content?.text;
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8 }}>
+              {customText ? 'Custom content' : 'Empty custom section'}
+            </Typography>
+          );
+        }
+        default:
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8 }}>
+              {section.type}
+            </Typography>
+          );
+      }
+    };
+
+    return (
+      <Draggable draggableId={section.id} index={index} isDragDisabled={isDragDisabled}>
+        {(provided, snapshot) => (
+          <Box
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            sx={{
+              mb: 0.5,
+              ml: level * 2,
+            }}
+          >
+            <Box
+              onClick={handleSelect}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelect();
                 }
               }}
+              tabIndex={0}
+              role="treeitem"
+              aria-selected={isSelected}
+              aria-expanded={canHaveChildren ? isExpanded : undefined}
+              aria-level={level + 1}
+              aria-label={`${section.title} - ${section.type}${section.isRequired ? ' (Required)' : ''}`}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                px: 1,
+                py: 0.75,
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: isSelected
+                  ? sectionColor
+                  : snapshot.isDragging
+                    ? alpha(sectionColor, 0.3)
+                    : 'transparent',
+                backgroundColor: isSelected
+                  ? alpha(sectionColor, 0.08)
+                  : snapshot.isDragging
+                    ? alpha(sectionColor, 0.05)
+                    : isHovered
+                      ? alpha(theme.palette.action.hover, 0.04)
+                      : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: isSelected
+                    ? alpha(sectionColor, 0.12)
+                    : alpha(theme.palette.action.hover, 0.08),
+                },
+              }}
             >
-              <DragIndicator fontSize="small" sx={{ color: 'text.secondary' }} />
-            </Box>
-
-            {/* Expand/Collapse Button */}
-            {canHaveChildren && (
-              <IconButton
-                size="small"
-                onClick={handleToggleExpansion}
-                sx={{ 
-                  mr: 0.5, 
-                  p: 0.25,
-                  color: hasChildren ? 'text.primary' : 'text.disabled'
+              {/* Drag Handle */}
+              <Box
+                {...provided.dragHandleProps}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  mr: 1,
+                  opacity: isHovered || snapshot.isDragging ? 1 : 0.3,
+                  transition: 'opacity 0.2s ease-in-out',
+                  cursor: 'grab',
+                  '&:active': {
+                    cursor: 'grabbing',
+                  },
                 }}
               >
-                {isExpanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-              </IconButton>
-            )}
-
-            {/* Section Icon */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                mr: 1,
-                color: sectionColor
-              }}
-            >
-              {getSectionIcon(section.type)}
-            </Box>
-
-            {/* Section Content */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: isSelected ? 500 : 400,
-                    color: 'text.primary',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    flex: 1
-                  }}
-                >
-                  {section.title}
-                </Typography>
-                
-                {section.isRequired && (
-                  <Chip
-                    label="Required"
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      height: 16,
-                      fontSize: '0.6rem',
-                      color: theme.palette.error.main,
-                      borderColor: theme.palette.error.main
-                    }}
-                  />
-                )}
+                <DragIndicator fontSize="small" sx={{ color: 'text.secondary' }} />
               </Box>
-              
-              <Box sx={{ mt: 0.25 }}>
-                {renderSectionContent()}
-              </Box>
-            </Box>
 
-            {/* Section Actions */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                opacity: isHovered || isSelected ? 1 : 0,
-                transition: 'opacity 0.2s ease-in-out',
-              }}
-            >
+              {/* Expand/Collapse Button */}
               {canHaveChildren && (
-                <Tooltip title="Add child section">
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddChild();
-                    }}
-                    sx={{ p: 0.25, mr: 0.5 }}
-                  >
-                    <Add fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-
-              <Tooltip title="More actions">
                 <IconButton
                   size="small"
-                  onClick={handleMenuClick}
-                  sx={{ p: 0.25 }}
+                  onClick={handleToggleExpansion}
+                  sx={{
+                    mr: 0.5,
+                    p: 0.25,
+                    color: hasChildren ? 'text.primary' : 'text.disabled',
+                  }}
                 >
-                  <MoreVert fontSize="small" />
+                  {isExpanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
                 </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
+              )}
 
-          {/* Context Menu */}
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            PaperProps={{
-              sx: { minWidth: 180 }
-            }}
-          >
-            <MenuItem onClick={handleEdit}>
-              <ListItemIcon>
-                <Edit fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Edit Section</ListItemText>
-            </MenuItem>
-            
-            <MenuItem onClick={handleDuplicate}>
-              <ListItemIcon>
-                <FileCopy fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Duplicate</ListItemText>
-            </MenuItem>
-            
-            <MenuItem onClick={handleToggleRequired}>
-              <ListItemIcon>
-                {section.isRequired ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-              </ListItemIcon>
-              <ListItemText>
-                {section.isRequired ? 'Make Optional' : 'Make Required'}
-              </ListItemText>
-            </MenuItem>
-            
-            <MenuItem
-              onClick={handleDelete}
-              sx={{ color: 'error.main' }}
-            >
-              <ListItemIcon>
-                <Delete fontSize="small" sx={{ color: 'error.main' }} />
-              </ListItemIcon>
-              <ListItemText>Delete</ListItemText>
-            </MenuItem>
-          </Menu>
+              {/* Section Icon */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  mr: 1,
+                  color: sectionColor,
+                }}
+              >
+                {getSectionIcon(section.type)}
+              </Box>
 
-          {/* Children Sections */}
-          {canHaveChildren && hasChildren && (
-            <Droppable droppableId={section.id} type="SECTION">
-              {(provided, snapshot) => (
-                <Collapse in={isExpanded}>
-                  <Box
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
+              {/* Section Content */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="body2"
                     sx={{
-                      mt: 0.5,
-                      ml: 1,
-                      pl: 1,
-                      borderLeft: `2px solid ${alpha(sectionColor, 0.2)}`,
-                      backgroundColor: snapshot.isDraggingOver 
-                        ? alpha(sectionColor, 0.05) 
-                        : 'transparent',
-                      transition: 'background-color 0.2s ease-in-out',
-                      minHeight: 8
+                      fontWeight: isSelected ? 500 : 400,
+                      color: 'text.primary',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
                     }}
                   >
-                    {section.children?.map((childSection, childIndex) => (
-                      <SectionNode
-                        key={childSection.id}
-                        section={childSection}
-                        index={childIndex}
-                        isSelected={isSelected}
-                        isExpanded={isExpanded}
-                        level={level + 1}
-                        onEdit={onEdit}
-                        onSelect={onSelect}
-                      />
-                    ))}
-                    {provided.placeholder}
-                  </Box>
-                </Collapse>
-              )}
-            </Droppable>
-          )}
-        </Box>
-      )}
-    </Draggable>
-  );
-});
+                    {section.title}
+                  </Typography>
+
+                  {section.isRequired && (
+                    <Chip
+                      label="Required"
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        height: 16,
+                        fontSize: '0.6rem',
+                        color: theme.palette.error.main,
+                        borderColor: theme.palette.error.main,
+                      }}
+                    />
+                  )}
+                </Box>
+
+                {renderSectionContent() && <Box sx={{ mt: 0.25 }}>{renderSectionContent()}</Box>}
+              </Box>
+
+              {/* Section Actions */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  opacity: isHovered || isSelected ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out',
+                }}
+              >
+                {canHaveChildren && (
+                  <Tooltip title="Add child section">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddChild();
+                      }}
+                      sx={{ p: 0.25, mr: 0.5 }}
+                    >
+                      <Add fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+
+                <Tooltip title="More actions">
+                  <IconButton size="small" onClick={handleMenuClick} sx={{ p: 0.25 }}>
+                    <MoreVert fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+
+            {/* Context Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              PaperProps={{
+                sx: { minWidth: 180 },
+              }}
+            >
+              <MenuItem onClick={handleEdit}>
+                <ListItemIcon>
+                  <Edit fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Edit Section</ListItemText>
+              </MenuItem>
+
+              <MenuItem onClick={handleDuplicate}>
+                <ListItemIcon>
+                  <FileCopy fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Duplicate</ListItemText>
+              </MenuItem>
+
+              <MenuItem onClick={handleToggleRequired}>
+                <ListItemIcon>
+                  {section.isRequired ? (
+                    <VisibilityOff fontSize="small" />
+                  ) : (
+                    <Visibility fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText>
+                  {section.isRequired ? 'Make Optional' : 'Make Required'}
+                </ListItemText>
+              </MenuItem>
+
+              <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+                <ListItemIcon>
+                  <Delete fontSize="small" sx={{ color: 'error.main' }} />
+                </ListItemIcon>
+                <ListItemText>Delete</ListItemText>
+              </MenuItem>
+            </Menu>
+
+            {/* Children Sections */}
+            {canHaveChildren && hasChildren && (
+              <Droppable droppableId={section.id} type="SECTION">
+                {(provided, snapshot) => (
+                  <Collapse in={isExpanded}>
+                    <Box
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      sx={{
+                        mt: 0.5,
+                        ml: 1,
+                        pl: 1,
+                        borderLeft: `2px solid ${alpha(sectionColor, 0.2)}`,
+                        backgroundColor: snapshot.isDraggingOver
+                          ? alpha(sectionColor, 0.05)
+                          : 'transparent',
+                        transition: 'background-color 0.2s ease-in-out',
+                        minHeight: 8,
+                      }}
+                    >
+                      {section.children?.map((childSection, childIndex) => (
+                        <SectionNode
+                          key={childSection.id}
+                          section={childSection}
+                          index={childIndex}
+                          isSelected={isSelected}
+                          isExpanded={isExpanded}
+                          level={level + 1}
+                          onEdit={onEdit}
+                          onSelect={onSelect}
+                        />
+                      ))}
+                      {provided.placeholder}
+                    </Box>
+                  </Collapse>
+                )}
+              </Droppable>
+            )}
+          </Box>
+        )}
+      </Draggable>
+    );
+  },
+);
 
 SectionNode.displayName = 'SectionNode';
 
