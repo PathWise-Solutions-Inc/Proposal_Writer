@@ -298,6 +298,7 @@ const SectionTree: React.FC<SectionTreeProps> = ({
                           isDragDisabled={readOnly}
                           level={0}
                           onEdit={handleSectionEdit}
+                          onSelect={handleSectionSelect}
                         />
                       );
                     })}

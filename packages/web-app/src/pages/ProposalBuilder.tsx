@@ -23,17 +23,20 @@ import {
   Download,
   Share,
   Settings,
-  History
+  History,
+  AutoAwesome
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState } from '../store';
-import { setCurrentProposal, updateProposalTitle } from '../store/slices/proposalSlice';
+import { setCurrentProposal, updateProposalTitle, updateSection } from '../store/slices/proposalSlice';
 import { ProposalSection, SectionType } from '../types/section.types';
 import SectionTree from '../components/proposal/SectionTree';
 import CollaboratorPresence from '../components/collaboration/CollaboratorPresence';
 import VersionHistory from '../components/proposal/VersionHistory';
+import { RichTextEditor } from '../components/proposal/rich-text-editor';
+import AIContentGenerator from '../components/proposal/AIContentGenerator';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAutoSave } from '../hooks/useAutoSave';
 
@@ -50,6 +53,8 @@ export default function ProposalBuilder() {
   const [selectedSection, setSelectedSection] = useState<ProposalSection | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [editorContent, setEditorContent] = useState<string>('');
 
   // Mock proposal data - in real app, this would come from API
   useEffect(() => {
@@ -191,6 +196,29 @@ export default function ProposalBuilder() {
 
   const handleSectionSelect = (section: ProposalSection) => {
     setSelectedSection(section);
+    // Load section content into editor
+    setEditorContent(section.content.text || '');
+  };
+
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+    setHasUnsavedChanges(true);
+    
+    // Update section content in Redux
+    if (selectedSection) {
+      dispatch(updateSection({
+        sectionId: selectedSection.id,
+        updates: {
+          content: { ...selectedSection.content, text: content }
+        }
+      }));
+    }
+  };
+
+  const handleAIContentGenerated = (content: string) => {
+    setEditorContent(content);
+    handleContentChange(content);
+    setShowAIGenerator(false);
   };
 
   if (loading) {
@@ -373,17 +401,57 @@ export default function ProposalBuilder() {
               )}
             </Box>
             
-            <Box sx={{ flex: 1, p: 3, overflow: 'auto' }}>
+            <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {selectedSection ? (
-                <Box>
-                  <Typography variant="body1">
-                    Content editor for "{selectedSection.title}" will be implemented here.
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    This will include rich text editing, AI content generation, 
-                    and integration with your content library.
-                  </Typography>
-                </Box>
+                <>
+                  {/* Editor Actions Bar */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderBottom: '1px solid', 
+                    borderColor: 'divider',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Stack direction="row" spacing={1}>
+                      <Chip 
+                        label={selectedSection.type} 
+                        size="small" 
+                        color="primary" 
+                        variant="outlined" 
+                      />
+                      {selectedSection.isRequired && (
+                        <Chip 
+                          label="Required" 
+                          size="small" 
+                          color="error" 
+                          variant="outlined" 
+                        />
+                      )}
+                    </Stack>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setShowAIGenerator(true)}
+                      startIcon={<AutoAwesome />}
+                    >
+                      AI Generate
+                    </Button>
+                  </Box>
+
+                  {/* Rich Text Editor */}
+                  <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                    <RichTextEditor
+                      content={editorContent}
+                      sectionType={selectedSection.type}
+                      sectionId={selectedSection.id}
+                      onChange={handleContentChange}
+                      onSave={handleSaveProposal}
+                      autoSave={true}
+                      showAIPanel={false}
+                    />
+                  </Box>
+                </>
               ) : (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
                   <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
@@ -410,6 +478,15 @@ export default function ProposalBuilder() {
             // In real app, this would restore the selected version
             setShowVersionHistory(false);
           }}
+        />
+      )}
+
+      {/* AI Content Generator Dialog */}
+      {showAIGenerator && selectedSection && (
+        <AIContentGenerator
+          section={selectedSection}
+          onContentGenerated={handleAIContentGenerated}
+          onClose={() => setShowAIGenerator(false)}
         />
       )}
     </Container>

@@ -78,6 +78,15 @@ public/uploads/
 *.pid
 *.seed
 *.pid.lock
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+!jest.config.js
+!vite.config.js
+!vitest.config.js
+!rollup.config.js
+!webpack.config.js
 
 # Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

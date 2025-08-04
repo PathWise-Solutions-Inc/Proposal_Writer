@@ -345,7 +345,7 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({
                     Current Content
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {section.content.substring(0, 200)}...
+                    {section.content.text ? section.content.text.substring(0, 200) : 'No content yet'}...
                   </Typography>
                 </CardContent>
               </Card>

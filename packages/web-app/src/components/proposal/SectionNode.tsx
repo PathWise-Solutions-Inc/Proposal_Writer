@@ -55,6 +55,7 @@ interface SectionNodeProps {
   isDragDisabled?: boolean;
   level: number;
   onEdit?: (section: ProposalSection) => void;
+  onSelect?: (section: ProposalSection) => void;
 }
 
 const getSectionIcon = (type: SectionType) => {
@@ -106,7 +107,8 @@ const SectionNode: React.FC<SectionNodeProps> = memo(({
   isExpanded,
   isDragDisabled = false,
   level,
-  onEdit
+  onEdit,
+  onSelect
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -128,6 +130,9 @@ const SectionNode: React.FC<SectionNodeProps> = memo(({
 
   const handleSelect = () => {
     dispatch(selectSection(section.id));
+    if (onSelect) {
+      onSelect(section);
+    }
   };
 
   const handleToggleExpansion = (event: React.MouseEvent) => {
@@ -468,6 +473,7 @@ const SectionNode: React.FC<SectionNodeProps> = memo(({
                         isExpanded={isExpanded}
                         level={level + 1}
                         onEdit={onEdit}
+                        onSelect={onSelect}
                       />
                     ))}
                     {provided.placeholder}
