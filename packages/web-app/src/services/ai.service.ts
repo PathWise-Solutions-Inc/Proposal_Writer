@@ -1,7 +1,29 @@
 import axios from 'axios';
 import { SectionType } from '../types/section.types';
 
-// AI Service Types
+// AI Service Types  
+export interface AIGenerationOptions {
+  tone: 'professional' | 'technical' | 'persuasive' | 'conversational';
+  context: {
+    proposalTitle: string;
+    sectionTitle: string;
+    sectionType: string;
+    previousContent?: any;
+    rfpRequirements?: string;
+  };
+  prompt?: string;
+}
+
+export interface GeneratedContent {
+  content: string;
+  metadata: {
+    wordCount: number;
+    readingTime: number;
+    tone: string;
+    qualityScore: number;
+  };
+}
+
 export interface AIGenerationRequest {
   prompt: string;
   context?: string;
@@ -135,7 +157,29 @@ class AIService {
     return prompt;
   }
 
-  async generateContent(request: AIGenerationRequest): Promise<AIGenerationResponse> {
+  async generateContent(sectionType: SectionType, options: AIGenerationOptions): Promise<GeneratedContent> {
+    const request: AIGenerationRequest = {
+      prompt: options.prompt || '',
+      context: `${options.context.proposalTitle} - ${options.context.sectionTitle}`,
+      sectionType: sectionType,
+      tone: options.tone as any,
+      model: this.defaultModel
+    };
+    
+    const response = await this.generateContentInternal(request);
+    
+    return {
+      content: response.content,
+      metadata: {
+        wordCount: response.content.split(/\s+/).length,
+        readingTime: Math.ceil(response.content.split(/\s+/).length / 200),
+        tone: options.tone,
+        qualityScore: Math.round(response.confidence * 100)
+      }
+    };
+  }
+
+  async generateContentInternal(request: AIGenerationRequest): Promise<AIGenerationResponse> {
     if (!this.apiKey) {
       throw new Error('OpenRouter API key not configured');
     }
@@ -337,11 +381,54 @@ class AIService {
     return Math.min(confidence, 1.0);
   }
 
+  async generateVariations(sectionType: SectionType, options: AIGenerationOptions, count: number = 3): Promise<GeneratedContent[]> {
+    const variations: GeneratedContent[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      try {
+        // Modify the prompt slightly for each variation
+        const modifiedOptions = {
+          ...options,
+          prompt: `${options.prompt || ''} (Variation ${i + 1})`
+        };
+        
+        const result = await this.generateContent(sectionType, modifiedOptions);
+        variations.push(result);
+      } catch (error) {
+        console.error(`Failed to generate variation ${i + 1}:`, error);
+      }
+    }
+    
+    return variations;
+  }
+
+  async improveContent(content: any, options: { tone: string; focusAreas: string[] }): Promise<GeneratedContent> {
+    const contentText = typeof content === 'string' ? content : content.text || '';
+    
+    const request: AIGenerationRequest = {
+      prompt: `Improve this content focusing on: ${options.focusAreas.join(', ')}\n\nOriginal content:\n${contentText}`,
+      tone: options.tone as any,
+      model: this.defaultModel
+    };
+    
+    const response = await this.generateContentInternal(request);
+    
+    return {
+      content: response.content,
+      metadata: {
+        wordCount: response.content.split(/\s+/).length,
+        readingTime: Math.ceil(response.content.split(/\s+/).length / 200),
+        tone: options.tone,
+        qualityScore: Math.round(response.confidence * 100)
+      }
+    };
+  }
+
   // Section-specific generation helpers
   async generateSectionContent(sectionType: SectionType, context: string, options: Partial<AIGenerationRequest> = {}): Promise<AIGenerationResponse> {
     const sectionPrompts = SECTION_PROMPTS[sectionType];
     
-    return this.generateContent({
+    return this.generateContentInternal({
       prompt: sectionPrompts.generate,
       context: `${sectionPrompts.context}\n\nSpecific context: ${context}`,
       sectionType,
@@ -352,7 +439,7 @@ class AIService {
   // Batch processing for multiple sections
   async processBatch(requests: AIGenerationRequest[]): Promise<AIGenerationResponse[]> {
     const results = await Promise.allSettled(
-      requests.map(request => this.generateContent(request))
+      requests.map(request => this.generateContentInternal(request))
     );
 
     return results.map((result, index) => {

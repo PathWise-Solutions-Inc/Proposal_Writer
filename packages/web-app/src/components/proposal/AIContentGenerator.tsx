@@ -49,6 +49,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { ProposalSection, SectionType } from '../../types/section.types';
 import { aiService, AIGenerationOptions, GeneratedContent } from '../../services/ai.service';
+import { aiBackendService } from '../../services/ai-backend.service';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -149,7 +150,11 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({
         prompt: prompt || `Generate ${length} content for "${section.title}" section`,
       };
 
-      const result = await aiService.generateContent(section.type, options);
+      // Use backend service if available, fallback to local
+      const useBackend = import.meta.env.VITE_USE_AI_BACKEND !== 'false';
+      const result = useBackend
+        ? await aiBackendService.generateContent(section.type, options)
+        : await aiService.generateContent(section.type, options);
       setGeneratedContent([result]);
       setSelectedVariation(0);
     } catch (err) {
@@ -175,7 +180,11 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({
         prompt: prompt || `Generate content variations for "${section.title}" section`,
       };
 
-      const variations = await aiService.generateVariations(section.type, options, 3);
+      // Use backend service if available, fallback to local
+      const useBackend = import.meta.env.VITE_USE_AI_BACKEND !== 'false';
+      const variations = useBackend
+        ? await aiBackendService.generateVariations(section.type, options, 3)
+        : await aiService.generateVariations(section.type, options, 3);
       setGeneratedContent(variations);
       setSelectedVariation(0);
     } catch (err) {
@@ -195,10 +204,17 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({
     setError(null);
     
     try {
-      const result = await aiService.improveContent(section.content, {
-        tone,
-        focusAreas: focusAreas.length > 0 ? focusAreas : ['clarity', 'persuasiveness'],
-      });
+      // Use backend service if available, fallback to local
+      const useBackend = import.meta.env.VITE_USE_AI_BACKEND !== 'false';
+      const result = useBackend
+        ? await aiBackendService.improveContent(section.content, {
+            tone,
+            focusAreas: focusAreas.length > 0 ? focusAreas : ['clarity', 'persuasiveness'],
+          })
+        : await aiService.improveContent(section.content, {
+            tone,
+            focusAreas: focusAreas.length > 0 ? focusAreas : ['clarity', 'persuasiveness'],
+          });
       
       setGeneratedContent([result]);
       setSelectedVariation(0);
