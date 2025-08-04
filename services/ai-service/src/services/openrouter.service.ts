@@ -227,7 +227,7 @@ export class OpenRouterService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as { data: any };
       return data.data;
     } catch (error) {
       logger.error('Failed to fetch models:', error);

@@ -28,7 +28,8 @@ export class RFP {
     fileHash?: string;
     filePath?: string;
     mimeType?: string;
-  };
+    analysisError?: string;
+  } | null;
 
   @Column({ type: 'text', nullable: true })
   extractedText: string;
@@ -39,6 +40,8 @@ export class RFP {
       criterion: string;
       weight: number;
       description: string;
+      maxPoints?: number;
+      scoringCriteria?: Array<string>;
     }>;
     requirements?: Array<{
       id: string;
@@ -48,14 +51,19 @@ export class RFP {
     }>;
     keyDates?: Array<{
       event: string;
-      date: Date;
+      date: Date | null;
     }>;
     budgetRange?: {
       min?: number;
       max?: number;
       currency?: string;
-    };
-  };
+    } | null;
+    summary?: string;
+    keywords?: Array<string>;
+    totalPoints?: number;
+    confidenceScore?: number;
+    analysisCompletedAt?: Date;
+  } | null;
 
   @Column({
     type: 'enum',

@@ -85,20 +85,13 @@ class RFPService {
       }
     });
 
-    const response = await fetch(`${this.baseURL}/upload`, {
-      method: 'POST',
+    const response = await api.post(`${this.baseURL}/upload`, formData, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'multipart/form-data',
       },
-      body: formData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Upload failed');
-    }
-
-    return response.json();
+    return response.data;
   }
 
   async getRFPStatus(rfpId: string): Promise<RFPStatus> {

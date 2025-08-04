@@ -15,6 +15,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { login } from '../store/slices/authSlice';
 import { authService } from '../services/auth.service';
+import DemoLogin from '../components/DemoLogin';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -129,7 +130,8 @@ export default function Login() {
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
-            <Box sx={{ textAlign: 'center' }}>
+            <DemoLogin />
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Typography variant="body2">
                 Don't have an account?{' '}
                 <Link to="/register" style={{ textDecoration: 'none' }}>
