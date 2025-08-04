@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Organization } from './Organization';
 import { User } from './User';
 import { RFP } from './RFP';
@@ -88,21 +88,21 @@ export class Proposal {
     snapshot?: any;
   }>;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'uuid' })
   organizationId: string;
 
   @ManyToOne(() => Organization)
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'uuid' })
   rfpId: string;
 
   @ManyToOne(() => RFP)
   @JoinColumn({ name: 'rfpId' })
   rfp: RFP;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'uuid' })
   ownerId: string;
 
   @ManyToOne(() => User)

@@ -67,7 +67,7 @@ export class SecurityLogger {
     }
   }
 
-  private static sendToMonitoring(event: SecurityEvent) {
+  private static sendToMonitoring(_event: SecurityEvent) {
     // TODO: Integrate with security monitoring service
     // Examples: Splunk, ELK Stack, Datadog, etc.
   }

@@ -29,7 +29,7 @@ export class User {
   @Column({ nullable: true })
   refreshToken?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   organizationId?: string;
 
   @ManyToOne(() => Organization, organization => organization.users)

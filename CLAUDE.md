@@ -110,6 +110,23 @@ The repository is hosted at: https://github.com/PathWise-Solutions-Inc/Proposal_
 - Uses main branch as default
 - Public repository for community collaboration
 
+## Common Development Issues and Solutions
+
+### TypeScript Unused Import Errors
+When you encounter TypeScript errors about unused imports (e.g., `'OneToMany' is declared but its value is never read`):
+- **Always remove unused imports** before committing or running services
+- **Use your editor's "Organize Imports" feature** or manually clean up imports
+- **Common in TypeORM entities**: When copying entity boilerplate, remove unused decorators like `OneToMany` if not defining relationships
+- **This blocks service startup**: The auth-service and other TypeScript services will crash on startup with these errors
+
+### Running Services
+When testing the application, ensure all required services are running:
+1. **Auth Service** (port 8001): `cd services/auth-service && npm run dev`
+2. **RFP Analysis Service** (port 8002): `cd services/rfp-analysis-service && npm run dev`
+3. **Frontend** (port 3000): `cd packages/web-app && npm run dev`
+4. **Redis** (for queues): `redis-server` or via Docker
+5. **PostgreSQL** (for database): Ensure database is running
+
 ## Available AI Agents
 
 Claude Code provides specialized agents that can assist with different aspects of the Proposal Writer project:

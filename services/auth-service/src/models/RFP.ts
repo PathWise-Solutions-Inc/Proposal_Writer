@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Organization } from './Organization';
 import { User } from './User';
 
@@ -64,14 +64,14 @@ export class RFP {
   })
   status: 'uploaded' | 'processing' | 'analyzed' | 'error';
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'uuid' })
   organizationId: string;
 
   @ManyToOne(() => Organization)
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'uuid' })
   uploadedById: string;
 
   @ManyToOne(() => User)
