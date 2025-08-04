@@ -6,30 +6,34 @@ export class DatabaseService {
   async findRfpByHash(fileHash: string, organizationId: string): Promise<RFP | null> {
     try {
       const repository = AppDataSource.getRepository(RFP);
-      return await repository.findOne({
-        where: {
-          'metadata.fileHash': fileHash,
-          organizationId
-        }
-      });
+      // Use query builder for JSONB field queries
+      const rfp = await repository
+        .createQueryBuilder('rfp')
+        .where("rfp.metadata->>'fileHash' = :fileHash", { fileHash })
+        .andWhere('rfp.organizationId = :organizationId', { organizationId })
+        .getOne();
+      
+      return rfp;
     } catch (error) {
       logger.error('Error finding RFP by hash', { error, fileHash, organizationId });
       throw error;
     }
   }
 
-  async createRfp(data: any): Promise<RFP> {
+  async createRfp(data: Partial<RFP>): Promise<RFP> {
     try {
       const repository = AppDataSource.getRepository(RFP);
       const rfp = repository.create(data);
-      return await repository.save(rfp);
+      const savedRfp = await repository.save(rfp);
+      // TypeORM save() returns the saved entity, not an array
+      return Array.isArray(savedRfp) ? savedRfp[0] : savedRfp;
     } catch (error) {
       logger.error('Error creating RFP', { error, data });
       throw error;
     }
   }
 
-  async updateRfpStatus(rfpId: string, status: string, additionalData?: any): Promise<void> {
+  async updateRfpStatus(rfpId: string, status: 'uploaded' | 'processing' | 'analyzed' | 'error', additionalData?: any): Promise<void> {
     try {
       const repository = AppDataSource.getRepository(RFP);
       await repository.update(

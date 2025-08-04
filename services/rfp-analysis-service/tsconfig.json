@@ -4,8 +4,8 @@
     "module": "commonjs",
     "lib": ["ES2020"],
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
+    "strictPropertyInitialization": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,8 +16,9 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "useUnknownInCatchVariables": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../auth-service/src/models/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

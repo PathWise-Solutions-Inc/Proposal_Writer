@@ -40,9 +40,10 @@ export const authMiddleware = async (
       const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
       req.user = decoded;
       next();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.warn('Invalid token attempt', { 
-        error: error.message,
+        error: errorMessage,
         ip: req.ip 
       });
       

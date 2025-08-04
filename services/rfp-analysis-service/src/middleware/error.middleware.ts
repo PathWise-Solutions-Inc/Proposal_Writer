@@ -25,3 +25,5 @@ export const errorHandler = (
     ...(isDevelopment && { stack: err.stack })
   });
 };
+
+export const errorMiddleware = errorHandler;

@@ -16,8 +16,8 @@ export class RFP {
   @Column({ type: 'varchar', length: 255 })
   clientName: string;
 
-  @Column({ type: 'date' })
-  dueDate: Date;
+  @Column({ type: 'date', nullable: true })
+  dueDate: Date | null;
 
   @Column({ type: 'jsonb', nullable: true })
   metadata: {
@@ -25,6 +25,9 @@ export class RFP {
     fileSize?: number;
     pageCount?: number;
     uploadedBy?: string;
+    fileHash?: string;
+    filePath?: string;
+    mimeType?: string;
   };
 
   @Column({ type: 'text', nullable: true })

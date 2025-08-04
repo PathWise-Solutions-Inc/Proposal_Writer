@@ -117,7 +117,7 @@ export class UploadService {
       // Update status if record was created
       if (rfpId) {
         await databaseService.updateRfpStatus(rfpId, 'error', {
-          error: error.message
+          error: error instanceof Error ? error.message : String(error)
         });
       }
 

@@ -42,7 +42,7 @@ export class TextExtractionService {
     } catch (error) {
       logger.error('Text extraction failed', { error, rfpId });
       await databaseService.updateRfpStatus(rfpId, 'error', {
-        extractionError: error.message
+        extractionError: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }

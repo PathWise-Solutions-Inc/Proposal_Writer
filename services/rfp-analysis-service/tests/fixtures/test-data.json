@@ -1,0 +1,285 @@
+{
+  "users": [
+    {
+      "id": "user-001",
+      "email": "john.doe@example.com",
+      "role": "admin",
+      "organizationId": "org-001",
+      "name": "John Doe"
+    },
+    {
+      "id": "user-002", 
+      "email": "jane.smith@example.com",
+      "role": "user",
+      "organizationId": "org-001",
+      "name": "Jane Smith"
+    },
+    {
+      "id": "user-003",
+      "email": "bob.wilson@company.com",
+      "role": "user", 
+      "organizationId": "org-002",
+      "name": "Bob Wilson"
+    }
+  ],
+  "organizations": [
+    {
+      "id": "org-001",
+      "name": "Example Corp",
+      "domain": "example.com",
+      "plan": "enterprise"
+    },
+    {
+      "id": "org-002", 
+      "name": "Company Ltd",
+      "domain": "company.com",
+      "plan": "professional"
+    }
+  ],
+  "rfps": [
+    {
+      "id": "rfp-001",
+      "title": "Enterprise CRM Implementation",
+      "clientName": "TechCorp Solutions",
+      "dueDate": "2024-03-01",
+      "description": "Complete CRM system implementation for 150-person company",
+      "organizationId": "org-001",
+      "uploadedById": "user-001",
+      "status": "analyzed",
+      "metadata": {
+        "originalFileName": "crm-rfp.pdf",
+        "fileSize": 245760,
+        "fileHash": "hash-001",
+        "mimeType": "application/pdf"
+      },
+      "extractedText": "Full extracted text content...",
+      "analysisResults": {
+        "evaluationCriteria": [
+          {
+            "criterion": "Technical Approach",
+            "weight": 30,
+            "description": "Quality of proposed technical solution"
+          },
+          {
+            "criterion": "Experience",
+            "weight": 25, 
+            "description": "Vendor experience and qualifications"
+          },
+          {
+            "criterion": "Project Management",
+            "weight": 20,
+            "description": "Implementation plan and project management approach"
+          },
+          {
+            "criterion": "Cost",
+            "weight": 15,
+            "description": "Total cost and value proposition"
+          },
+          {
+            "criterion": "Support",
+            "weight": 10,
+            "description": "Ongoing support and maintenance"
+          }
+        ],
+        "requirements": [
+          {
+            "id": "req-001",
+            "text": "Cloud-based solution with 99.9% uptime SLA",
+            "category": "technical",
+            "mandatory": true
+          },
+          {
+            "id": "req-002",
+            "text": "Integration with Office 365",
+            "category": "integration",
+            "mandatory": true
+          },
+          {
+            "id": "req-003",
+            "text": "Mobile application support",
+            "category": "features",
+            "mandatory": true
+          },
+          {
+            "id": "req-004",
+            "text": "SOC 2 Type II compliance",
+            "category": "security",
+            "mandatory": true
+          },
+          {
+            "id": "req-005",
+            "text": "Salesforce or Microsoft Dynamics platform",
+            "category": "platform",
+            "mandatory": false
+          }
+        ],
+        "keyDates": [
+          {
+            "event": "Proposal Due Date",
+            "date": "2024-03-01"
+          },
+          {
+            "event": "Vendor Presentations",
+            "date": "2024-03-12"
+          },
+          {
+            "event": "Final Selection",
+            "date": "2024-03-22"
+          },
+          {
+            "event": "Project Kick-off",
+            "date": "2024-04-15"
+          }
+        ],
+        "budgetRange": {
+          "min": 250000,
+          "max": 500000,
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "id": "rfp-002",
+      "title": "Website Redesign Project",
+      "clientName": "Marketing Agency Inc",
+      "dueDate": "2024-02-15",
+      "description": "Complete website redesign and development",
+      "organizationId": "org-001",
+      "uploadedById": "user-002",
+      "status": "processing",
+      "metadata": {
+        "originalFileName": "website-rfp.docx",
+        "fileSize": 123456,
+        "fileHash": "hash-002",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "extractedText": "Website redesign requirements...",
+      "analysisResults": null
+    },
+    {
+      "id": "rfp-003",
+      "title": "IT Infrastructure Upgrade",
+      "clientName": "Manufacturing Co",
+      "dueDate": "2024-04-30",
+      "description": "Data center modernization and network upgrade",
+      "organizationId": "org-002",
+      "uploadedById": "user-003",
+      "status": "uploaded",
+      "metadata": {
+        "originalFileName": "infrastructure-rfp.txt",
+        "fileSize": 87234,
+        "fileHash": "hash-003",
+        "mimeType": "text/plain"
+      },
+      "extractedText": null,
+      "analysisResults": null
+    }
+  ],
+  "validationScenarios": [
+    {
+      "name": "valid_pdf_upload",
+      "description": "Valid PDF file upload with all required fields",
+      "data": {
+        "title": "Valid PDF Test",
+        "clientName": "Test Client Co",
+        "dueDate": "2024-12-31",
+        "description": "Valid PDF upload test scenario"
+      },
+      "file": {
+        "originalname": "valid-test.pdf",
+        "mimetype": "application/pdf",
+        "size": 102400
+      },
+      "expectedStatus": 201
+    },
+    {
+      "name": "missing_client_name",
+      "description": "Upload without required clientName field",
+      "data": {
+        "title": "Missing Client Test",
+        "dueDate": "2024-12-31"
+      },
+      "file": {
+        "originalname": "test.pdf",
+        "mimetype": "application/pdf", 
+        "size": 102400
+      },
+      "expectedStatus": 400
+    },
+    {
+      "name": "invalid_file_type",
+      "description": "Upload with unsupported file type",
+      "data": {
+        "title": "Invalid File Type",
+        "clientName": "Test Client"
+      },
+      "file": {
+        "originalname": "test.exe",
+        "mimetype": "application/x-executable",
+        "size": 102400
+      },
+      "expectedStatus": 400
+    },
+    {
+      "name": "file_too_large",
+      "description": "Upload exceeding size limit",
+      "data": {
+        "title": "Large File Test",
+        "clientName": "Test Client"
+      },
+      "file": {
+        "originalname": "large.pdf",
+        "mimetype": "application/pdf",
+        "size": 52428801
+      },
+      "expectedStatus": 413
+    }
+  ],
+  "errorScenarios": [
+    {
+      "name": "database_connection_error",
+      "description": "Database connection failure during upload",
+      "mockError": {
+        "service": "databaseService",
+        "method": "createRfp",
+        "error": "Connection timeout"
+      },
+      "expectedStatus": 500
+    },
+    {
+      "name": "text_extraction_failure",
+      "description": "Text extraction service failure",
+      "mockError": {
+        "service": "textExtractionService", 
+        "method": "extractText",
+        "error": "PDF parsing failed"
+      },
+      "expectedStatus": 500
+    },
+    {
+      "name": "queue_service_failure",
+      "description": "Analysis queue service failure",
+      "mockError": {
+        "service": "analysisQueueService",
+        "method": "queueForAnalysis", 
+        "error": "Redis connection failed"
+      },
+      "expectedStatus": 500
+    }
+  ],
+  "performanceTests": [
+    {
+      "name": "concurrent_uploads",
+      "description": "Multiple simultaneous file uploads",
+      "concurrency": 10,
+      "fileSize": 1048576,
+      "expectedMaxResponseTime": 5000
+    },
+    {
+      "name": "large_file_upload",
+      "description": "Maximum size file upload performance",
+      "fileSize": 52428800,
+      "expectedMaxResponseTime": 30000
+    }
+  ]
+}
