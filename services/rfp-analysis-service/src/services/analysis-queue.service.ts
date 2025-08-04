@@ -22,18 +22,64 @@ export class AnalysisQueueService {
     this.setupQueueHandlers();
   }
 
-  async queueForAnalysis(rfpId: string): Promise<void> {
+  async queueForAnalysis(rfpId: string, priority: number = 1): Promise<Bull.Job> {
     try {
-      await this.queue.add('analyze-rfp', { rfpId }, {
-        priority: 1,
+      const job = await this.queue.add('analyze-rfp', { rfpId }, {
+        priority,
         delay: 1000 // Small delay to ensure text extraction completes
       });
       
-      logger.info('RFP queued for analysis', { rfpId });
+      logger.info('RFP queued for analysis', { 
+        rfpId, 
+        jobId: job.id,
+        priority 
+      });
+      
+      return job;
     } catch (error) {
       logger.error('Failed to queue RFP for analysis', { error, rfpId });
       throw error;
     }
+  }
+
+  async getJobStatus(jobId: string): Promise<{
+    state: string;
+    progress: number;
+    result?: any;
+    failedReason?: string;
+  }> {
+    const job = await this.queue.getJob(jobId);
+    if (!job) {
+      throw new Error(`Job not found: ${jobId}`);
+    }
+
+    const state = await job.getState();
+    const progress = job.progress();
+    
+    return {
+      state,
+      progress: typeof progress === 'number' ? progress : 0,
+      result: job.returnvalue,
+      failedReason: job.failedReason
+    };
+  }
+
+  async getQueueStats(): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+  }> {
+    const [waiting, active, completed, failed, delayed] = await Promise.all([
+      this.queue.getWaitingCount(),
+      this.queue.getActiveCount(),
+      this.queue.getCompletedCount(),
+      this.queue.getFailedCount(),
+      this.queue.getDelayedCount()
+    ]);
+
+    return { waiting, active, completed, failed, delayed };
   }
 
   private setupQueueHandlers() {
@@ -49,6 +95,14 @@ export class AnalysisQueueService {
         jobId: job.id, 
         rfpId: job.data.rfpId,
         error: err.message 
+      });
+    });
+
+    this.queue.on('progress', (job, progress) => {
+      logger.debug('Analysis job progress', { 
+        jobId: job.id, 
+        rfpId: job.data.rfpId,
+        progress 
       });
     });
   }

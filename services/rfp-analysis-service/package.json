@@ -5,8 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
+    "dev:worker": "nodemon --exec ts-node src/workers/analysis.worker.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:worker": "node dist/workers/analysis.worker.js",
     "test": "ts-node tests/run-tests.ts",
     "test:unit": "jest tests/unit --coverage",
     "test:integration": "jest tests/integration",
