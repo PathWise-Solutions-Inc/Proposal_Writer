@@ -2,7 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 interface JwtPayload {
   id: string;

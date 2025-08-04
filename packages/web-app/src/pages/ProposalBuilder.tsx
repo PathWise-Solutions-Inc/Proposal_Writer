@@ -48,6 +48,7 @@ import AIContentGenerator from '../components/proposal/AIContentGenerator';
 import { KeyboardShortcutsDialog } from '../components/proposal/KeyboardShortcutsDialog';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAutoSave } from '../hooks/useAutoSave';
+import { ProposalErrorBoundary, EditorErrorBoundary } from '../components/ErrorBoundary';
 import { useGlobalKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 export default function ProposalBuilder() {
@@ -224,9 +225,10 @@ export default function ProposalBuilder() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
+    <ProposalErrorBoundary proposalId={id}>
+      <Container maxWidth="xl" sx={{ py: 3 }}>
+        {/* Header */}
+        <Box sx={{ mb: 3 }}>
         <Breadcrumbs 
           separator={<ChevronRight fontSize="small" />} 
           sx={{ mb: 2 }}
@@ -427,12 +429,21 @@ export default function ProposalBuilder() {
 
                   {/* Content Editor */}
                   <Box sx={{ flex: 1, p: 2 }}>
-                    <RichTextEditor
-                      initialContent={editorContent}
-                      onChange={handleContentChange}
-                      placeholder="Enter your content here..."
-                      readOnly={false}
-                    />
+                    <EditorErrorBoundary 
+                      currentContent={editorContent}
+                      onSaveContent={(content) => {
+                        // Handle emergency save
+                        handleContentChange(content);
+                        handleSaveProposal();
+                      }}
+                    >
+                      <RichTextEditor
+                        initialContent={editorContent}
+                        onChange={handleContentChange}
+                        placeholder="Enter your content here..."
+                        readOnly={false}
+                      />
+                    </EditorErrorBoundary>
                   </Box>
                 </>
               ) : (
@@ -479,5 +490,6 @@ export default function ProposalBuilder() {
         onClose={() => setShowKeyboardShortcuts(false)}
       />
     </Container>
+    </ProposalErrorBoundary>
   );
 }

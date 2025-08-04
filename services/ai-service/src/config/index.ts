@@ -19,7 +19,7 @@ export const config = {
   
   // JWT configuration
   jwt: {
-    secret: process.env.JWT_SECRET || 'your-secret-key',
+    secret: process.env.JWT_SECRET!,
     expiresIn: process.env.JWT_EXPIRES_IN || '24h'
   },
   
@@ -36,7 +36,7 @@ export const config = {
 };
 
 // Validate required environment variables
-const requiredEnvVars = ['OPENROUTER_API_KEY'];
+const requiredEnvVars = ['OPENROUTER_API_KEY', 'JWT_SECRET'];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`Error: Missing required environment variable ${envVar}`);

@@ -61,6 +61,7 @@ import {
   Home,
   ChevronRight,
 } from 'lucide-react';
+import { RfpErrorBoundary } from '../components/ErrorBoundary';
 
 const RfpDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -245,9 +246,10 @@ const RfpDetailsPage: React.FC = () => {
   const dueDate = formatDueDate(analysis.dueDate);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs separator={<ChevronRight size={16} />} sx={{ mb: 3 }}>
+    <RfpErrorBoundary rfpId={id}>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs separator={<ChevronRight size={16} />} sx={{ mb: 3 }}>
         <Link
           component="button"
           variant="body2"
@@ -774,6 +776,7 @@ const RfpDetailsPage: React.FC = () => {
         </Fade>
       )}
     </Container>
+    </RfpErrorBoundary>
   );
 };
 

@@ -26,9 +26,12 @@ export const authMiddleware = async (
     }
 
     // Verify token
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'your-secret-key'
+      process.env.JWT_SECRET
     ) as any;
 
     // Add user info to request
