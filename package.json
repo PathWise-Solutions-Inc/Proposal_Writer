@@ -32,7 +32,10 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "immer": "^10.1.1",
     "node-fetch": "^2.7.0",
-    "openai": "^5.11.0"
+    "openai": "^5.11.0",
+    "react-beautiful-dnd": "^13.1.1"
   }
 }
