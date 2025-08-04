@@ -250,14 +250,15 @@ const proposalSlice = createSlice({
       const originalSection = findSectionById(state.sectionTree.sections, sectionId);
       
       if (originalSection) {
+        const duplicatedSectionId = generateSectionId();
         const duplicatedSection: ProposalSection = {
           ...originalSection,
-          id: generateSectionId(),
+          id: duplicatedSectionId,
           title: `${originalSection.title} (Copy)`,
           children: originalSection.children?.map(child => ({
             ...child,
             id: generateSectionId(),
-            parentId: generateSectionId()
+            parentId: duplicatedSectionId
           })),
           metadata: {
             ...originalSection.metadata,

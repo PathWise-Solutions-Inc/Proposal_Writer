@@ -251,7 +251,7 @@ const SectionNode: React.FC<SectionNodeProps> = memo(
     };
 
     return (
-      <Draggable draggableId={section.id} index={index} isDragDisabled={isDragDisabled}>
+      <Draggable draggableId={String(section.id || `section-${index}`)} index={index} isDragDisabled={isDragDisabled}>
         {(provided, snapshot) => (
           <Box
             ref={provided.innerRef}
@@ -463,7 +463,7 @@ const SectionNode: React.FC<SectionNodeProps> = memo(
 
             {/* Children Sections */}
             {canHaveChildren && hasChildren && (
-              <Droppable droppableId={section.id} type="SECTION">
+              <Droppable droppableId={String(section.id)} type="SECTION">
                 {(provided, snapshot) => (
                   <Collapse in={isExpanded}>
                     <Box
