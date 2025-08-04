@@ -13,8 +13,7 @@ import {
   Divider,
   Chip,
   Stack,
-  Alert,
-  TextField
+  Alert
 } from '@mui/material';
 import {
   Home,
@@ -25,21 +24,31 @@ import {
   Share,
   Settings,
   History,
-  AutoAwesome
+  AutoAwesome,
+  Keyboard
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState } from '../store';
-import { setCurrentProposal, updateProposalTitle, updateSection } from '../store/slices/proposalSlice';
+import { 
+  setCurrentProposal, 
+  updateProposalTitle, 
+  updateSection,
+  addSection,
+  deleteSection,
+  duplicateSection 
+} from '../store/slices/proposalSlice';
 import { ProposalSection, SectionType } from '../types/section.types';
 import SectionTree from '../components/proposal/SectionTree';
 import CollaboratorPresence from '../components/collaboration/CollaboratorPresence';
 import VersionHistory from '../components/proposal/VersionHistory';
-// import { RichTextEditor } from '../components/proposal/rich-text-editor';
+import { RichTextEditor } from '../components/proposal/RichTextEditor';
 import AIContentGenerator from '../components/proposal/AIContentGenerator';
+import { KeyboardShortcutsDialog } from '../components/proposal/KeyboardShortcutsDialog';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAutoSave } from '../hooks/useAutoSave';
+import { useGlobalKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 export default function ProposalBuilder() {
   const navigate = useNavigate();
@@ -56,6 +65,11 @@ export default function ProposalBuilder() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [editorContent, setEditorContent] = useState<string>('');
+  const [showSectionTree, setShowSectionTree] = useState(true);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+
+  // Initialize keyboard shortcuts
+  useGlobalKeyboardShortcuts();
 
   // Load proposal from store or redirect if not found
   useEffect(() => {
@@ -73,6 +87,49 @@ export default function ProposalBuilder() {
       dispatch(setCurrentProposal(proposal));
     }
   }, [proposalId, currentProposal, proposals, dispatch, navigate]);
+
+  // Keyboard shortcut event listeners
+  useEffect(() => {
+    const handleSaveShortcut = () => handleSaveProposal();
+    const handlePreviewShortcut = () => handlePreviewProposal();
+    const handleNewSectionShortcut = () => {
+      // Add new section logic
+      if (selectedSection) {
+        dispatch(addSection({ parentId: selectedSection.id }));
+      }
+    };
+    const handleDuplicateShortcut = () => {
+      if (selectedSection) {
+        dispatch(duplicateSection(selectedSection.id));
+      }
+    };
+    const handleDeleteShortcut = () => {
+      if (selectedSection && window.confirm('Delete this section?')) {
+        dispatch(deleteSection(selectedSection.id));
+        setSelectedSection(null);
+      }
+    };
+    const handleAIGenerateShortcut = () => setShowAIGenerator(true);
+    const handleToggleTreeShortcut = () => setShowSectionTree(prev => !prev);
+
+    window.addEventListener('proposal:save', handleSaveShortcut);
+    window.addEventListener('proposal:preview', handlePreviewShortcut);
+    window.addEventListener('section:new', handleNewSectionShortcut);
+    window.addEventListener('section:duplicate', handleDuplicateShortcut);
+    window.addEventListener('section:delete', handleDeleteShortcut);
+    window.addEventListener('ai:generate', handleAIGenerateShortcut);
+    window.addEventListener('tree:toggle', handleToggleTreeShortcut);
+
+    return () => {
+      window.removeEventListener('proposal:save', handleSaveShortcut);
+      window.removeEventListener('proposal:preview', handlePreviewShortcut);
+      window.removeEventListener('section:new', handleNewSectionShortcut);
+      window.removeEventListener('section:duplicate', handleDuplicateShortcut);
+      window.removeEventListener('section:delete', handleDeleteShortcut);
+      window.removeEventListener('ai:generate', handleAIGenerateShortcut);
+      window.removeEventListener('tree:toggle', handleToggleTreeShortcut);
+    };
+  }, [selectedSection, dispatch]);
 
   // Auto-save functionality
   const { triggerSave } = useAutoSave({
@@ -234,6 +291,12 @@ export default function ProposalBuilder() {
                 </IconButton>
               </Tooltip>
               
+              <Tooltip title="Keyboard shortcuts">
+                <IconButton onClick={() => setShowKeyboardShortcuts(true)}>
+                  <Keyboard />
+                </IconButton>
+              </Tooltip>
+              
               <Button
                 variant="outlined"
                 startIcon={<Preview />}
@@ -258,7 +321,8 @@ export default function ProposalBuilder() {
       {/* Main Content */}
       <Grid container spacing={3}>
         {/* Section Tree Panel */}
-        <Grid item xs={12} md={4} lg={3}>
+        {showSectionTree && (
+          <Grid item xs={12} md={4} lg={3}>
           <Paper 
             variant="outlined" 
             sx={{ 
@@ -286,9 +350,10 @@ export default function ProposalBuilder() {
             </Box>
           </Paper>
         </Grid>
+        )}
 
         {/* Content Editor Panel */}
-        <Grid item xs={12} md={8} lg={9}>
+        <Grid item xs={12} md={showSectionTree ? 8 : 12} lg={showSectionTree ? 9 : 12}>
           <Paper 
             variant="outlined" 
             sx={{ 
@@ -361,24 +426,12 @@ export default function ProposalBuilder() {
                   </Box>
 
                   {/* Content Editor */}
-                  <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      variant="outlined"
-                      value={editorContent}
-                      onChange={(e) => handleContentChange(e.target.value)}
+                  <Box sx={{ flex: 1, p: 2 }}>
+                    <RichTextEditor
+                      initialContent={editorContent}
+                      onChange={handleContentChange}
                       placeholder="Enter your content here..."
-                      sx={{
-                        '& .MuiInputBase-root': {
-                          height: '100%',
-                          alignItems: 'flex-start',
-                        },
-                        '& .MuiInputBase-input': {
-                          height: '100% !important',
-                          overflow: 'auto !important',
-                        },
-                      }}
+                      readOnly={false}
                     />
                   </Box>
                 </>
@@ -419,6 +472,12 @@ export default function ProposalBuilder() {
           onClose={() => setShowAIGenerator(false)}
         />
       )}
+
+      {/* Keyboard Shortcuts Dialog */}
+      <KeyboardShortcutsDialog
+        open={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
+      />
     </Container>
   );
 }

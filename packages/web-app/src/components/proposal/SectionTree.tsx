@@ -23,6 +23,7 @@ import {
 import SectionNode from './SectionNode';
 import SectionControls from './SectionControls';
 import SectionEditor from './SectionEditor';
+import { SectionTemplatesDialog } from './SectionTemplatesDialog';
 
 interface SectionTreeProps {
   showControls?: boolean;
@@ -39,9 +40,10 @@ const SectionTree: React.FC<SectionTreeProps> = ({
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { sectionTree, loading, error } = useSelector((state: RootState) => state.proposal);
+  const { sectionTree, loading, error, currentProposal } = useSelector((state: RootState) => state.proposal);
   
   const [editingSection, setEditingSection] = useState<ProposalSection | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   // Filter sections based on search and filters
   const filteredSections = useMemo(() => {
@@ -225,6 +227,7 @@ const SectionTree: React.FC<SectionTreeProps> = ({
           <SectionControls
             onExpandAll={handleExpandAll}
             onCollapseAll={handleCollapseAll}
+            onShowTemplates={() => setShowTemplates(true)}
           />
         )}
         
@@ -248,6 +251,7 @@ const SectionTree: React.FC<SectionTreeProps> = ({
         <SectionControls
           onExpandAll={handleExpandAll}
           onCollapseAll={handleCollapseAll}
+          onShowTemplates={() => setShowTemplates(true)}
         />
       )}
       
@@ -335,6 +339,15 @@ const SectionTree: React.FC<SectionTreeProps> = ({
           open={Boolean(editingSection)}
           onClose={() => setEditingSection(null)}
           onSave={() => setEditingSection(null)}
+        />
+      )}
+
+      {/* Section Templates Dialog */}
+      {currentProposal && (
+        <SectionTemplatesDialog
+          open={showTemplates}
+          onClose={() => setShowTemplates(false)}
+          proposalId={currentProposal.id}
         />
       )}
     </Box>

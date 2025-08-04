@@ -24,7 +24,8 @@ import {
   UnfoldMore,
   UnfoldLess,
   Clear,
-  Tune
+  Tune,
+  Description
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -42,12 +43,14 @@ interface SectionControlsProps {
   onExpandAll: () => void;
   onCollapseAll: () => void;
   showTemplateSelector?: boolean;
+  onShowTemplates?: () => void;
 }
 
 const SectionControls: React.FC<SectionControlsProps> = ({
   onExpandAll,
   onCollapseAll,
-  showTemplateSelector = true
+  showTemplateSelector = true,
+  onShowTemplates
 }) => {
   const dispatch = useDispatch();
   const { sectionTree } = useSelector((state: RootState) => state.proposal);
@@ -151,14 +154,26 @@ const SectionControls: React.FC<SectionControlsProps> = ({
       >
         {/* Add Section Button */}
         {showTemplateSelector && (
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setShowTypeSelector(true)}
-            sx={{ minWidth: 'auto' }}
-          >
-            Add Section
-          </Button>
+          <>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setShowTypeSelector(true)}
+              sx={{ minWidth: 'auto' }}
+            >
+              Add Section
+            </Button>
+            {onShowTemplates && (
+              <Button
+                variant="outlined"
+                startIcon={<Description />}
+                onClick={onShowTemplates}
+                sx={{ minWidth: 'auto' }}
+              >
+                Templates
+              </Button>
+            )}
+          </>
         )}
 
         {/* Search Field */}
