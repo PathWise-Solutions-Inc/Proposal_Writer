@@ -19,12 +19,21 @@ interface Proposal {
   createdBy: string;
 }
 
+interface AutoSaveState {
+  status: 'idle' | 'saving' | 'saved' | 'error';
+  lastSaved: string | null;
+  error?: string;
+}
+
 interface ProposalState {
   proposals: Proposal[];
   currentProposal: Proposal | null;
   sectionTree: SectionTreeState;
   loading: boolean;
   error: string | null;
+  autoSave: AutoSaveState;
+  autoSaveEnabled: boolean;
+  hasUnsavedChanges: boolean;
 }
 
 const initialSectionTreeState: SectionTreeState = {
@@ -42,6 +51,12 @@ const initialState: ProposalState = {
   sectionTree: initialSectionTreeState,
   loading: false,
   error: null,
+  autoSave: {
+    status: 'idle',
+    lastSaved: null,
+  },
+  autoSaveEnabled: true,
+  hasUnsavedChanges: false,
 };
 
 // Helper functions
@@ -194,6 +209,7 @@ const proposalSlice = createSlice({
         state.currentProposal.sections = state.sectionTree.sections;
         state.currentProposal.updatedAt = new Date().toISOString();
       }
+      state.hasUnsavedChanges = true;
     },
 
     updateSection: (state, action: PayloadAction<{ 
@@ -208,6 +224,7 @@ const proposalSlice = createSlice({
         state.currentProposal.sections = state.sectionTree.sections;
         state.currentProposal.updatedAt = new Date().toISOString();
       }
+      state.hasUnsavedChanges = true;
     },
 
     duplicateSection: (state, action: PayloadAction<string>) => {
@@ -312,6 +329,7 @@ const proposalSlice = createSlice({
         state.currentProposal.sections = state.sectionTree.sections;
         state.currentProposal.updatedAt = new Date().toISOString();
       }
+      state.hasUnsavedChanges = true;
     },
 
     selectSection: (state, action: PayloadAction<string>) => {
@@ -347,6 +365,17 @@ const proposalSlice = createSlice({
 
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
+    },
+
+    // Auto-save actions
+    setAutoSaveStatus: (state, action: PayloadAction<Partial<AutoSaveState>>) => {
+      state.autoSave = { ...state.autoSave, ...action.payload };
+    },
+    toggleAutoSave: (state) => {
+      state.autoSaveEnabled = !state.autoSaveEnabled;
+    },
+    setHasUnsavedChanges: (state, action: PayloadAction<boolean>) => {
+      state.hasUnsavedChanges = action.payload;
     }
   },
 });
@@ -365,7 +394,10 @@ export const {
   setSectionFilters,
   setDraggedSection,
   setLoading,
-  setError
+  setError,
+  setAutoSaveStatus,
+  toggleAutoSave,
+  setHasUnsavedChanges
 } = proposalSlice.actions;
 
 export default proposalSlice.reducer;

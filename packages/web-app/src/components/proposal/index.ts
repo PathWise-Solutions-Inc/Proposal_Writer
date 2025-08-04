@@ -3,3 +3,6 @@ export { default as SectionNode } from './SectionNode';
 export { default as SectionControls } from './SectionControls';
 export { default as SectionTypeSelector } from './SectionTypeSelector';
 export { default as SectionEditor } from './SectionEditor';
+
+// Rich Text Editor Components
+export * from './rich-text-editor';

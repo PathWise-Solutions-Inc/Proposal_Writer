@@ -32,10 +32,16 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
+    "@types/diff": "^7.0.2",
+    "@types/lodash": "^4.17.20",
     "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/socket.io-client": "^1.4.36",
+    "diff": "^8.0.2",
     "immer": "^10.1.1",
+    "lodash": "^4.17.21",
     "node-fetch": "^2.7.0",
     "openai": "^5.11.0",
-    "react-beautiful-dnd": "^13.1.1"
+    "react-beautiful-dnd": "^13.1.1",
+    "socket.io-client": "^4.8.1"
   }
 }

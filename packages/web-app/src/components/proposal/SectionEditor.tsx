@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -16,13 +16,17 @@ import {
   InputLabel,
   IconButton,
   Chip,
-  Stack
+  Stack,
+  Tab,
+  Tabs
 } from '@mui/material';
-import { Close, Save } from '@mui/icons-material';
+import { Close, Save, Edit, SmartToy, AutoAwesome } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 
 import { ProposalSection, SectionType, ListType } from '../../types/section.types';
 import { updateSection } from '../../store/slices/proposalSlice';
+import { RichTextEditor } from './rich-text-editor';
+import AIContentGenerator from './AIContentGenerator';
 
 interface SectionEditorProps {
   section: ProposalSection;
@@ -31,6 +35,8 @@ interface SectionEditorProps {
   onSave: () => void;
 }
 
+type EditorMode = 'basic' | 'rich';
+
 const SectionEditor: React.FC<SectionEditorProps> = ({
   section,
   open,
@@ -38,6 +44,11 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   onSave
 }) => {
   const dispatch = useDispatch();
+  const [editorMode, setEditorMode] = useState<EditorMode>(
+    section.type === SectionType.PARAGRAPH || 
+    section.type === SectionType.HEADING ||
+    section.type === SectionType.CUSTOM ? 'rich' : 'basic'
+  );
   const [formData, setFormData] = useState({
     title: section.title,
     type: section.type,
@@ -45,6 +56,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     isRequired: section.isRequired || false,
     tags: section.metadata?.tags || []
   });
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   useEffect(() => {
     setFormData({
@@ -56,7 +68,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     });
   }, [section]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     dispatch(updateSection({
       sectionId: section.id,
       updates: {
@@ -66,14 +78,14 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         metadata: {
           ...section.metadata,
           tags: formData.tags,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         }
       }
     }));
     onSave();
-  };
+  }, [dispatch, section.id, section.metadata, formData, onSave]);
 
-  const handleContentChange = (field: string, value: any) => {
+  const handleContentChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       content: {
@@ -81,7 +93,20 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         [field]: value
       }
     }));
-  };
+  }, []);
+
+  const handleRichTextChange = useCallback((newContent: any) => {
+    setFormData(prev => ({
+      ...prev,
+      content: newContent
+    }));
+  }, []);
+
+  const supportsRichText = (
+    section.type === SectionType.PARAGRAPH ||
+    section.type === SectionType.HEADING ||
+    section.type === SectionType.CUSTOM
+  );
 
   const renderContentEditor = () => {
     switch (formData.type) {
@@ -203,10 +228,16 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth={editorMode === 'rich' && supportsRichText ? 'xl' : 'md'}
       fullWidth
       PaperProps={{
-        sx: { borderRadius: 2 }
+        sx: { 
+          borderRadius: 2,
+          ...(editorMode === 'rich' && supportsRichText && {
+            height: '90vh',
+            maxHeight: '90vh'
+          })
+        }
       }}
     >
       <DialogTitle>
@@ -220,8 +251,21 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent>
-        <Box sx={{ pt: 1 }}>
+      <DialogContent sx={{ 
+        ...(editorMode === 'rich' && supportsRichText && {
+          height: 'calc(90vh - 120px)',
+          display: 'flex',
+          flexDirection: 'column'
+        })
+      }}>
+        <Box sx={{ 
+          pt: 1,
+          ...(editorMode === 'rich' && supportsRichText && {
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column'
+          })
+        }}>
           <TextField
             fullWidth
             label="Section Title"
@@ -230,10 +274,58 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             sx={{ mb: 3 }}
           />
 
+          {/* Editor Mode Tabs */}
+          {supportsRichText && (
+            <Box sx={{ mb: 2 }}>
+              <Tabs
+                value={editorMode}
+                onChange={(_, newMode) => setEditorMode(newMode)}
+                sx={{ mb: 2 }}
+              >
+                <Tab
+                  value="basic"
+                  label="Basic Editor"
+                  icon={<Edit fontSize="small" />}
+                  iconPosition="start"
+                  sx={{ textTransform: 'none', minHeight: 48 }}
+                />
+                <Tab
+                  value="rich"
+                  label="Rich Text + AI"
+                  icon={<SmartToy fontSize="small" />}
+                  iconPosition="start"
+                  sx={{ textTransform: 'none', minHeight: 48 }}
+                />
+              </Tabs>
+            </Box>
+          )}
+
           <Typography variant="subtitle2" sx={{ mb: 2 }}>
             Content
           </Typography>
-          {renderContentEditor()}
+          
+          {/* Rich Text Editor */}
+          {editorMode === 'rich' && supportsRichText ? (
+            <Box sx={{ 
+              flex: 1, 
+              minHeight: 400,
+              mb: 2,
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <RichTextEditor
+                content={formData.content}
+                sectionType={section.type}
+                sectionId={section.id}
+                onChange={handleRichTextChange}
+                onSave={handleSave}
+                autoSave={false}
+                showAIPanel={true}
+              />
+            </Box>
+          ) : (
+            renderContentEditor()
+          )}
 
           <Box sx={{ mt: 3 }}>
             <FormControlLabel
@@ -250,6 +342,15 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <Button
+            onClick={() => setShowAIGenerator(true)}
+            startIcon={<AutoAwesome />}
+            color="secondary"
+          >
+            Generate with AI
+          </Button>
+        </Box>
         <Button onClick={onClose} color="inherit">
           Cancel
         </Button>

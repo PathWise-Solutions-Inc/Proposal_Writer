@@ -32,11 +32,16 @@ import { RootState } from '../store';
 import { setCurrentProposal, updateProposalTitle } from '../store/slices/proposalSlice';
 import { ProposalSection, SectionType } from '../types/section.types';
 import SectionTree from '../components/proposal/SectionTree';
+import CollaboratorPresence from '../components/collaboration/CollaboratorPresence';
+import VersionHistory from '../components/proposal/VersionHistory';
+import { useWebSocket } from '../hooks/useWebSocket';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 export default function ProposalBuilder() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id: proposalId } = useParams<{ id: string }>();
+  const { isConnected } = useWebSocket();
   
   const { currentProposal, sectionTree, loading, error } = useSelector(
     (state: RootState) => state.proposal
@@ -44,6 +49,7 @@ export default function ProposalBuilder() {
   
   const [selectedSection, setSelectedSection] = useState<ProposalSection | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   // Mock proposal data - in real app, this would come from API
   useEffect(() => {
@@ -148,6 +154,21 @@ export default function ProposalBuilder() {
     }
   }, [proposalId, currentProposal, dispatch]);
 
+  // Auto-save functionality
+  const { triggerSave } = useAutoSave({
+    onSave: async () => {
+      if (!currentProposal) return;
+      
+      // In real app, this would save to API
+      console.log('Auto-saving proposal:', currentProposal);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+    },
+    interval: 30000, // 30 seconds
+    debounceDelay: 2000, // 2 seconds
+  });
+
   const handleSaveProposal = async () => {
     if (!currentProposal) return;
     
@@ -155,6 +176,9 @@ export default function ProposalBuilder() {
       // In real app, this would save to API
       console.log('Saving proposal:', currentProposal);
       setHasUnsavedChanges(false);
+      
+      // Trigger manual save
+      await triggerSave();
     } catch (error) {
       console.error('Failed to save proposal:', error);
     }
@@ -242,35 +266,42 @@ export default function ProposalBuilder() {
             </Stack>
           </Box>
 
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="View history">
-              <IconButton>
-                <History />
-              </IconButton>
-            </Tooltip>
+          <Stack direction="row" spacing={2} alignItems="center">
+            {/* Collaboration Presence */}
+            <CollaboratorPresence />
             
-            <Tooltip title="Settings">
-              <IconButton>
-                <Settings />
-              </IconButton>
-            </Tooltip>
+            <Divider orientation="vertical" flexItem />
             
-            <Button
-              variant="outlined"
-              startIcon={<Preview />}
-              onClick={handlePreviewProposal}
-            >
-              Preview
-            </Button>
-            
-            <Button
-              variant="contained"
-              startIcon={<Save />}
-              onClick={handleSaveProposal}
-              disabled={!hasUnsavedChanges}
-            >
-              Save
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="View history">
+                <IconButton onClick={() => setShowVersionHistory(true)}>
+                  <History />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Settings">
+                <IconButton>
+                  <Settings />
+                </IconButton>
+              </Tooltip>
+              
+              <Button
+                variant="outlined"
+                startIcon={<Preview />}
+                onClick={handlePreviewProposal}
+              >
+                Preview
+              </Button>
+              
+              <Button
+                variant="contained"
+                startIcon={<Save />}
+                onClick={handleSaveProposal}
+                disabled={!hasUnsavedChanges}
+              >
+                Save
+              </Button>
+            </Stack>
           </Stack>
         </Box>
       </Box>
@@ -367,6 +398,20 @@ export default function ProposalBuilder() {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Version History Dialog */}
+      {showVersionHistory && currentProposal && (
+        <VersionHistory
+          proposalId={currentProposal.id}
+          open={showVersionHistory}
+          onClose={() => setShowVersionHistory(false)}
+          onRestore={(version) => {
+            console.log('Restoring version:', version);
+            // In real app, this would restore the selected version
+            setShowVersionHistory(false);
+          }}
+        />
+      )}
     </Container>
   );
 }

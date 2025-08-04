@@ -106,11 +106,24 @@ const SectionTree: React.FC<SectionTreeProps> = ({
   const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, source, draggableId } = result;
     
+    console.log('Drag ended:', {
+      draggableId,
+      source: source,
+      destination: destination
+    });
+    
     // Clear drag state
     dispatch(setDraggedSection(undefined));
     
-    if (!destination) return;
-    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+    if (!destination) {
+      console.log('No destination, cancelling drag');
+      return;
+    }
+    
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      console.log('Same position, cancelling drag');
+      return;
+    }
     
     // Dispatch move action
     dispatch(moveSection({
@@ -122,6 +135,10 @@ const SectionTree: React.FC<SectionTreeProps> = ({
   }, [dispatch]);
 
   const handleDragStart = useCallback((start: any) => {
+    console.log('Drag started:', {
+      draggableId: start.draggableId,
+      source: start.source
+    });
     dispatch(setDraggedSection(start.draggableId));
   }, [dispatch]);
 
@@ -269,18 +286,21 @@ const SectionTree: React.FC<SectionTreeProps> = ({
               >
                 <Fade in timeout={300}>
                   <Box>
-                    {filteredSections.map((section, index) => (
-                      <SectionNode
-                        key={section.id}
-                        section={section}
-                        index={index}
-                        isSelected={sectionTree.selectedSectionId === section.id}
-                        isExpanded={sectionTree.expandedSections.has(section.id)}
-                        isDragDisabled={readOnly}
-                        level={0}
-                        onEdit={handleSectionEdit}
-                      />
-                    ))}
+                    {filteredSections.map((section, index) => {
+                      console.log('Rendering section:', { id: section.id, index, title: section.title });
+                      return (
+                        <SectionNode
+                          key={section.id}
+                          section={section}
+                          index={index}
+                          isSelected={sectionTree.selectedSectionId === section.id}
+                          isExpanded={sectionTree.expandedSections.has(section.id)}
+                          isDragDisabled={readOnly}
+                          level={0}
+                          onEdit={handleSectionEdit}
+                        />
+                      );
+                    })}
                     {provided.placeholder}
                   </Box>
                 </Fade>
