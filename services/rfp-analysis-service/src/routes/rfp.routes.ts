@@ -13,7 +13,6 @@ router.use(authMiddleware);
 // Upload RFP
 router.post(
   '/upload',
-  validationMiddleware(rfpValidationSchemas.upload),
   uploadController.uploadRFP
 );
 

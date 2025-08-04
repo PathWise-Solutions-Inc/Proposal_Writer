@@ -89,11 +89,19 @@ export class UploadController {
         }
 
         try {
+          // Validate required fields
+          if (!req.body.clientName) {
+            return res.status(400).json({
+              error: 'Validation error',
+              message: 'clientName is required'
+            });
+          }
+
           // Process the uploaded file
           const uploadResult = await uploadService.processUpload({
             file: req.file,
-            userId: (req as any).user.id,
-            organizationId: (req as any).user.organizationId,
+            userId: req.user?.id || 'unknown',
+            organizationId: req.user?.organizationId || 'default-org',
             metadata: {
               title: req.body.title || req.file.originalname,
               clientName: req.body.clientName,
@@ -105,7 +113,7 @@ export class UploadController {
           logger.info('RFP uploaded successfully', {
             rfpId: uploadResult.rfpId,
             filename: req.file.originalname,
-            userId: (req as any).user.id
+            userId: req.user?.id
           });
 
           res.status(201).json({

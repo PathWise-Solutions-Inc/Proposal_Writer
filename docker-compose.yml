@@ -59,6 +59,15 @@ services:
     networks:
       - proposal-writer-network
 
+  # Apache Tika Server
+  tika:
+    image: apache/tika:latest-full
+    container_name: proposal-writer-tika
+    ports:
+      - "9998:9998"
+    networks:
+      - proposal-writer-network
+
   # Auth Service
   auth-service:
     build:
